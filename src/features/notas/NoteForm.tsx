@@ -54,7 +54,7 @@ export function NoteForm({
             rows={9}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className={`${inputClass} resize-y font-mono text-[13px] leading-relaxed`}
+            className={`${inputClass} resize-y font-mono leading-relaxed`}
           />
         </Field>
         {error && (
