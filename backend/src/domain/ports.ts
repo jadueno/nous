@@ -1,4 +1,4 @@
-import type { Chunk, NewNote, Note, RetrievedChunk } from "./types.js";
+import type { NewNote, Note, RetrievedChunk } from "./types.js";
 
 export interface NoteRepository {
   list(): Promise<Note[]>;
