@@ -3,22 +3,37 @@ import type { RetrievedChunk } from "../../domain/types.js";
 
 const DIMENSIONS = 1024;
 
-// Palabras vacías del español: sin filtrarlas, dos notas sin nada en común comparten
-// igualmente "el", "de", "para"... y salen con una similitud espuria — hace que el
+// Palabras vacías del español: sin filtrarlas, dos notas sin nada que ver comparten
+// igualmente "el", "de", "le"... y salen con una similitud espuria — hace que el
 // ranking de la demo/tests se parezca más al de un embedding real (que sí capta que
-// estas palabras no aportan significado).
+// estas palabras no aportan significado). Incluye pronombres átonos (le/les/me/te...):
+// sin ellos, dos notas con la misma plantilla ("A X le gusta Y") pesan tanto por el
+// "le gusta" compartido como por el nombre real — bug real encontrado al preguntar
+// "¿Qué le gusta comer a Flor?" y que citara también una nota sobre Juan.
 const STOPWORDS = new Set([
   "el", "la", "los", "las", "un", "una", "unos", "unas", "de", "del", "en", "y", "o",
   "a", "que", "es", "se", "su", "sus", "para", "con", "por", "lo", "al", "como",
+  "le", "les", "me", "te", "nos", "os", "mi", "mis", "tu", "tus",
 ]);
+
+function stripAccents(value: string): string {
+  return value.normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
 
 /** Embedding "hashing trick" (bolsa de palabras con hash, normalizado a longitud 1):
  * determinista y sin red, pero con similitud coseno que sí refleja solapamiento de
  * palabras con significado — suficiente para que los tests de integración y E2E
- * verifiquen ranking real sin depender de una API de pago ni de claves. */
+ * verifiquen ranking real sin depender de una API de pago ni de claves.
+ *
+ * Sigue siendo una bolsa de palabras cruda, sin ningún tipo de ponderación por
+ * relevancia (como haría un embedding real): dos notas con la misma estructura de
+ * frase pero distinto sujeto ("A Flor le gusta cenar pizza" vs "A Juan le gusta comer
+ * fideos") pueden seguir empatando en similitud, porque cada palabra cuenta igual.
+ * Para desambiguar casos así de verdad hace falta un proveedor real (Voyage/Claude,
+ * ver ANTHROPIC_API_KEY/VOYAGE_API_KEY en backend/.env). */
 function hashEmbedding(text: string): number[] {
   const vector = new Array(DIMENSIONS).fill(0);
-  const words = (text.toLowerCase().match(/[a-záéíóúñü0-9]+/gi) ?? []).filter((w) => !STOPWORDS.has(w));
+  const words = (stripAccents(text.toLowerCase()).match(/[a-z0-9]+/g) ?? []).filter((w) => !STOPWORDS.has(w));
   for (const word of words) {
     let hash = 0;
     for (let i = 0; i < word.length; i++) hash = (hash * 31 + word.charCodeAt(i)) >>> 0;
