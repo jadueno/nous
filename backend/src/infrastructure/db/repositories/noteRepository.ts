@@ -80,8 +80,6 @@ export function createNoteRepository(pool: Pool): NoteRepository {
       return rows.map(toNote);
     },
 
-    get: (id) => getNoteWithTags(pool, id),
-
     create: async (input) => {
       const client = await pool.connect();
       try {

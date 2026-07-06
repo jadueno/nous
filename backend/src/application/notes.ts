@@ -38,8 +38,6 @@ export function createNoteUseCases(
   return {
     list: (filter?: { tag?: string }): Promise<Note[]> => noteRepository.list(filter),
 
-    get: (id: string): Promise<Note | null> => noteRepository.get(id),
-
     listTags: (): Promise<string[]> => noteRepository.listTags(),
 
     create: async (input: NewNote): Promise<Note> => {

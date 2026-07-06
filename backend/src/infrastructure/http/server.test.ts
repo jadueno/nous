@@ -64,10 +64,6 @@ describe("CRUD /notes", () => {
     expect(res.statusCode).toBe(400);
   });
 
-  it("GET /notes/:id sobre un id inexistente devuelve 404", async () => {
-    const res = await app.inject({ method: "GET", url: "/notes/00000000-0000-0000-0000-000000000000" });
-    expect(res.statusCode).toBe(404);
-  });
 });
 
 describe("etiquetas", () => {

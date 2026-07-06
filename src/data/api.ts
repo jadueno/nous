@@ -25,7 +25,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const notesApi = {
   list: (tag?: string) => request<Note[]>(`/notes${tag ? `?tag=${encodeURIComponent(tag)}` : ""}`),
-  get: (id: string) => request<Note>(`/notes/${id}`),
   create: (note: NewNote) => request<Note>("/notes", { method: "POST", body: JSON.stringify(note) }),
   update: (id: string, note: NewNote) => request<Note>(`/notes/${id}`, { method: "PUT", body: JSON.stringify(note) }),
   remove: (id: string) => request<void>(`/notes/${id}`, { method: "DELETE" }),

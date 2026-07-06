@@ -11,7 +11,6 @@ function fakeNoteRepository(): NoteRepository {
       const all = [...notes.values()];
       return filter?.tag ? all.filter((n) => n.tags.includes(filter.tag!)) : all;
     },
-    get: async (id) => notes.get(id) ?? null,
     create: async (input) => {
       const note: Note = { id: `n${++counter}`, ...input, createdAt: "2026-01-01", updatedAt: "2026-01-01" };
       notes.set(note.id, note);
@@ -124,7 +123,7 @@ describe("createNoteUseCases", () => {
     await useCases.remove(note.id);
 
     expect(removeSpy).toHaveBeenCalledWith(note.id);
-    expect(await noteRepository.get(note.id)).toBeNull();
+    expect(await noteRepository.list()).toEqual([]);
   });
 
   it("list() con filtro de etiqueta solo devuelve las notas que la llevan", async () => {

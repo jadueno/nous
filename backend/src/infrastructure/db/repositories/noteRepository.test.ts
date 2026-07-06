@@ -22,16 +22,13 @@ describe("noteRepository", () => {
     const repo = createNoteRepository(pool);
 
     const created = await repo.create({ title: "Primera nota", content: "Contenido inicial", tags: [] });
-    expect(created.title).toBe("Primera nota");
-
-    const fetched = await repo.get(created.id);
-    expect(fetched).toMatchObject({ title: "Primera nota", content: "Contenido inicial", tags: [] });
+    expect(created).toMatchObject({ title: "Primera nota", content: "Contenido inicial", tags: [] });
 
     const updated = await repo.update(created.id, { title: "Nota editada", content: "Nuevo contenido", tags: [] });
     expect(updated).toMatchObject({ title: "Nota editada", content: "Nuevo contenido" });
 
     await repo.remove(created.id);
-    expect(await repo.get(created.id)).toBeNull();
+    expect(await repo.list()).toEqual([]);
   });
 
   it("list() devuelve las notas ordenadas por última actualización, más reciente primero", async () => {
@@ -56,9 +53,6 @@ describe("noteRepository", () => {
 
     const created = await repo.create({ title: "Nota", content: "x", tags: ["flor", "comida"] });
     expect(created.tags).toEqual(["comida", "flor"]);
-
-    const fetched = await repo.get(created.id);
-    expect(fetched?.tags).toEqual(["comida", "flor"]);
   });
 
   it("update() sustituye por completo las etiquetas anteriores", async () => {

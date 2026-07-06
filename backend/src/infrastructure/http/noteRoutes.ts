@@ -17,13 +17,6 @@ export function registerNoteRoutes(app: FastifyInstance, useCases: NoteUseCases)
     return useCases.list(tag ? { tag } : undefined);
   });
 
-  app.get("/notes/:id", async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const note = await useCases.get(id);
-    if (!note) return reply.code(404).send({ error: "Nota no encontrada" });
-    return note;
-  });
-
   app.get("/tags", async () => useCases.listTags());
 
   app.post("/notes", async (request, reply) => {

@@ -12,7 +12,6 @@ interface StoredNote {
 
 export interface NoteRepository {
   list(filter?: { tag?: string }): Promise<Note[]>;
-  get(id: string): Promise<Note | null>;
   create(note: StoredNote): Promise<Note>;
   update(id: string, note: StoredNote): Promise<Note | null>;
   remove(id: string): Promise<void>;
