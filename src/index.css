@@ -65,3 +65,26 @@ body {
     0 2px 8px rgba(var(--shadow-tint), 0.08),
     0 12px 28px -10px rgba(var(--shadow-tint), 0.2);
 }
+
+@keyframes shimmer {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -50% 0;
+  }
+}
+
+/* Skeleton de carga: mismo patrón en todas las pantallas mientras llegan los datos. */
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton-shimmer {
+    background-image: linear-gradient(
+      100deg,
+      var(--gridline) 30%,
+      color-mix(in srgb, var(--gridline) 40%, var(--surface-1)) 50%,
+      var(--gridline) 70%
+    );
+    background-size: 250% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
+}
