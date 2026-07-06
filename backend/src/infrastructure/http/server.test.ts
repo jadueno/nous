@@ -70,6 +70,25 @@ describe("CRUD /notes", () => {
   });
 });
 
+describe("etiquetas", () => {
+  it("guarda las etiquetas al crear/editar y GET /notes?tag= filtra por ellas", async () => {
+    const noteA = await app.inject({
+      method: "POST",
+      url: "/notes",
+      payload: { content: "Nota A", tags: ["comida", "flor"] },
+    });
+    expect(noteA.json().tags).toEqual(["comida", "flor"]);
+
+    await app.inject({ method: "POST", url: "/notes", payload: { content: "Nota B", tags: ["viajes"] } });
+
+    const filtered = await app.inject({ method: "GET", url: "/notes?tag=comida" });
+    expect(filtered.json().map((n: { title: string }) => n.title)).toEqual(["Nota A"]);
+
+    const tags = await app.inject({ method: "GET", url: "/tags" });
+    expect(tags.json()).toEqual(["comida", "flor", "viajes"]);
+  });
+});
+
 describe("POST /ask", () => {
   it("responde citando la nota de origen", async () => {
     await app.inject({

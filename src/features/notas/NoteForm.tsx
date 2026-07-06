@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { Field, inputClass } from "../../components/Field";
+import { TagInput } from "../../components/TagInput";
 import type { NewNote, Note } from "../../data/types";
 
 /** Formulario de crear/editar nota: mismo componente para ambos casos, distinguidos por
@@ -17,6 +18,7 @@ export function NoteForm({
   onCancel: () => void;
 }) {
   const [content, setContent] = useState(initialNote?.content ?? "");
+  const [tags, setTags] = useState<string[]>(initialNote?.tags ?? []);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +27,7 @@ export function NoteForm({
     setSubmitting(true);
     setError(null);
     try {
-      await onSubmit({ content });
+      await onSubmit({ content, tags });
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se ha podido guardar la nota");
     } finally {
@@ -49,6 +51,7 @@ export function NoteForm({
             className={`${inputClass} resize-y font-mono leading-relaxed`}
           />
         </Field>
+        <TagInput label="Etiquetas" tags={tags} onChange={setTags} />
         {error && (
           <p role="alert" className="text-xs" style={{ color: "var(--status-critical)" }}>
             {error}

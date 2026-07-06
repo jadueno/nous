@@ -2,13 +2,16 @@ export interface Note {
   id: string;
   title: string;
   content: string;
+  /** Nombres de etiqueta, sin duplicados. Gestionadas aparte (tabla `tags`) para poder
+   * renombrarlas/listarlas todas, no un array suelto en la propia nota. */
+  tags: string[];
   createdAt: string;
   updatedAt: string;
 }
 
 /** Sin campo de título: se deriva de la primera línea del contenido (ver
  * `deriveTitle` en ports.ts) — una nota rápida es solo texto, sin nada más que rellenar. */
-export type NewNote = Pick<Note, "content">;
+export type NewNote = Pick<Note, "content" | "tags">;
 
 /** Un trozo de una nota, ya vectorizado. El embedding vive en infraestructura
  * (columna vector en Postgres/pgvector) — el dominio solo conoce su existencia

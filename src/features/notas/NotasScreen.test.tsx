@@ -5,22 +5,26 @@ import { ConfirmProvider } from "../../components/ConfirmProvider";
 import type { Note } from "../../data/types";
 import { NotasScreen } from "./NotasScreen";
 
-const { notesApi } = vi.hoisted(() => ({
+const { notesApi, tagsApi } = vi.hoisted(() => ({
   notesApi: {
     list: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     remove: vi.fn(),
   },
+  tagsApi: {
+    list: vi.fn(),
+  },
 }));
 
-vi.mock("../../data/api", () => ({ notesApi }));
+vi.mock("../../data/api", () => ({ notesApi, tagsApi }));
 
 function note(overrides: Partial<Note> = {}): Note {
   return {
     id: "n1",
     title: "Receta de pan",
     content: "Harina, agua, sal y levadura.",
+    tags: [],
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
     ...overrides,
@@ -38,6 +42,7 @@ function renderScreen() {
 describe("NotasScreen", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    tagsApi.list.mockResolvedValue([]);
   });
 
   it("sin notas, muestra el aviso de que no hay ninguna", async () => {
@@ -58,7 +63,10 @@ describe("NotasScreen", () => {
     await user.type(screen.getByLabelText(/Contenido/), "Receta de pan\nHarina, agua, sal y levadura.");
     await user.click(screen.getByRole("button", { name: "Crear nota" }));
 
-    expect(notesApi.create).toHaveBeenCalledWith({ content: "Receta de pan\nHarina, agua, sal y levadura." });
+    expect(notesApi.create).toHaveBeenCalledWith({
+      content: "Receta de pan\nHarina, agua, sal y levadura.",
+      tags: [],
+    });
     expect(await screen.findByText("Receta de pan")).toBeInTheDocument();
   });
 
@@ -88,5 +96,20 @@ describe("NotasScreen", () => {
 
     expect(notesApi.remove).not.toHaveBeenCalled();
     expect(screen.getByText("Receta de pan")).toBeInTheDocument();
+  });
+
+  it("muestra las etiquetas de cada nota y permite filtrar la lista al pulsar una", async () => {
+    const user = userEvent.setup();
+    const withTags = note({ id: "n1", title: "Receta de pan", tags: ["comida"] });
+    notesApi.list.mockResolvedValue([withTags]);
+    tagsApi.list.mockResolvedValue(["comida", "viajes"]);
+    renderScreen();
+
+    await screen.findByText("Receta de pan");
+    expect(screen.getAllByText("comida")).toHaveLength(2); // chip de la nota + botón de filtro
+    expect(screen.getByText("viajes")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "viajes" }));
+    await waitFor(() => expect(notesApi.list).toHaveBeenLastCalledWith("viajes"));
   });
 });

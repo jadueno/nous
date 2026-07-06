@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chunkText, deriveTitle } from "./ports.js";
+import { chunkText, deriveTitle, normalizeTags } from "./ports.js";
 
 describe("chunkText", () => {
   it("con un texto corto, devuelve un único trozo", () => {
@@ -34,5 +34,19 @@ describe("deriveTitle", () => {
 
   it("con contenido en blanco, devuelve un título de reserva en vez de una cadena vacía", () => {
     expect(deriveTitle("   \n  ")).toBe("Sin título");
+  });
+});
+
+describe("normalizeTags", () => {
+  it("recorta espacios y descarta etiquetas vacías", () => {
+    expect(normalizeTags(["  comida  ", "", "   ", "flor"])).toEqual(["comida", "flor"]);
+  });
+
+  it("quita duplicados exactos, conservando la primera aparición", () => {
+    expect(normalizeTags(["comida", "flor", "comida"])).toEqual(["comida", "flor"]);
+  });
+
+  it("no fuerza minúsculas: 'Comida' y 'comida' son etiquetas distintas", () => {
+    expect(normalizeTags(["Comida", "comida"])).toEqual(["Comida", "comida"]);
   });
 });

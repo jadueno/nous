@@ -30,7 +30,7 @@ describe("chunkRepository", () => {
   it("replaceForNote sustituye por completo los trozos anteriores de la nota", async () => {
     const notes = createNoteRepository(pool);
     const chunks = createChunkRepository(pool);
-    const note = await notes.create({ title: "Nota", content: "..." });
+    const note = await notes.create({ title: "Nota", content: "...", tags: [] });
 
     await chunks.replaceForNote(note.id, [{ content: "v1", position: 0, embedding: unitVector(0) }]);
     await chunks.replaceForNote(note.id, [{ content: "v2", position: 0, embedding: unitVector(1) }]);
@@ -42,8 +42,8 @@ describe("chunkRepository", () => {
   it("searchSimilar ordena por similitud coseno, más parecido primero", async () => {
     const notes = createNoteRepository(pool);
     const chunks = createChunkRepository(pool);
-    const noteA = await notes.create({ title: "Nota A", content: "..." });
-    const noteB = await notes.create({ title: "Nota B", content: "..." });
+    const noteA = await notes.create({ title: "Nota A", content: "...", tags: [] });
+    const noteB = await notes.create({ title: "Nota B", content: "...", tags: [] });
 
     await chunks.replaceForNote(noteA.id, [{ content: "sobre gatos", position: 0, embedding: unitVector(0) }]);
     await chunks.replaceForNote(noteB.id, [{ content: "sobre coches", position: 0, embedding: unitVector(1) }]);
@@ -58,7 +58,7 @@ describe("chunkRepository", () => {
   it("borrar una nota borra en cascada sus trozos", async () => {
     const notes = createNoteRepository(pool);
     const chunks = createChunkRepository(pool);
-    const note = await notes.create({ title: "Nota", content: "..." });
+    const note = await notes.create({ title: "Nota", content: "...", tags: [] });
     await chunks.replaceForNote(note.id, [{ content: "x", position: 0, embedding: unitVector(0) }]);
 
     await notes.remove(note.id);

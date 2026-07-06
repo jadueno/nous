@@ -1,19 +1,23 @@
 import type { Note, RetrievedChunk } from "./types.js";
 
-/** El repositorio siempre persiste título + contenido (columnas reales de la tabla);
- * es el caso de uso quien deriva el título a partir del contenido antes de llamarlo
- * — el repositorio no sabe nada de esa regla de negocio. */
+/** El repositorio siempre persiste título + contenido + etiquetas (ya resueltas a
+ * nombres de etiqueta, sin duplicados); es el caso de uso quien deriva el título y
+ * normaliza las etiquetas antes de llamarlo — el repositorio no sabe nada de esas
+ * reglas de negocio, solo persiste. */
 interface StoredNote {
   title: string;
   content: string;
+  tags: string[];
 }
 
 export interface NoteRepository {
-  list(): Promise<Note[]>;
+  list(filter?: { tag?: string }): Promise<Note[]>;
   get(id: string): Promise<Note | null>;
   create(note: StoredNote): Promise<Note>;
   update(id: string, note: StoredNote): Promise<Note | null>;
   remove(id: string): Promise<void>;
+  /** Todas las etiquetas existentes (para el filtro/autocompletado), ordenadas alfabéticamente. */
+  listTags(): Promise<string[]>;
 }
 
 export interface ChunkRepository {
@@ -52,6 +56,21 @@ export function deriveTitle(content: string): string {
     .find((line) => line.length > 0);
   if (!firstLine) return "Sin título";
   return firstLine.length > MAX_TITLE_LENGTH ? `${firstLine.slice(0, MAX_TITLE_LENGTH).trim()}…` : firstLine;
+}
+
+/** Limpia la lista de etiquetas de una nota: recorta espacios, descarta vacías y quita
+ * duplicados exactos (conserva may/min tal cual las escribió el usuario — no fuerza
+ * minúsculas, es una decisión de UX, no de corrección). */
+export function normalizeTags(tags: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const tag of tags) {
+    const trimmed = tag.trim();
+    if (!trimmed || seen.has(trimmed)) continue;
+    seen.add(trimmed);
+    result.push(trimmed);
+  }
+  return result;
 }
 
 /** Trocea el contenido de una nota en fragmentos manejables para vectorizar. Vive en el

@@ -5,6 +5,7 @@ import { useConfirm } from "../../components/ConfirmProvider";
 import { focusRing } from "../../components/Field";
 import { ListSkeleton } from "../../components/LoadingState";
 import { useNotes } from "../../data/useNotes";
+import { useTags } from "../../data/useTags";
 import type { Note } from "../../data/types";
 import { NoteForm } from "./NoteForm";
 
@@ -29,7 +30,9 @@ function preview(content: string): string {
 }
 
 export function NotasScreen() {
-  const { notes, loading, error, addNote, updateNote, removeNote } = useNotes();
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const { notes, loading, error, addNote, updateNote, removeNote } = useNotes(activeTag ?? undefined);
+  const allTags = useTags(notes);
   const confirm = useConfirm();
   const [editing, setEditing] = useState<Note | "new" | null>(null);
 
@@ -54,6 +57,29 @@ export function NotasScreen() {
           {editing ? "Cancelar" : "+ Nueva nota"}
         </Button>
       </div>
+
+      {allTags.length > 0 && (
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por etiqueta">
+          {allTags.map((tag) => {
+            const isActive = tag === activeTag;
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setActiveTag(isActive ? null : tag)}
+                aria-pressed={isActive}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${focusRing} ${
+                  isActive
+                    ? "bg-[var(--ink)] text-[var(--on-ink)]"
+                    : "bg-[var(--surface-1)] text-[var(--text-secondary)] hover:bg-[var(--gridline)]"
+                }`}
+              >
+                {tag}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {editing === "new" && (
         <NoteForm
@@ -95,7 +121,11 @@ export function NotasScreen() {
 
       {!loading && !error && notes.length === 0 && (
         <Card className="text-center">
-          <p className="text-sm text-[var(--text-muted)]">Todavía no tienes ninguna nota. Escribe la primera.</p>
+          <p className="text-sm text-[var(--text-muted)]">
+            {activeTag
+              ? `Ninguna nota con la etiqueta "${activeTag}".`
+              : "Todavía no tienes ninguna nota. Escribe la primera."}
+          </p>
         </Card>
       )}
 
@@ -112,6 +142,18 @@ export function NotasScreen() {
                 <p className="text-xs text-[var(--text-muted)]">Actualizada {formatUpdated(note.updatedAt)}</p>
                 <p className="text-sm text-[var(--text-secondary)]">{preview(note.content)}</p>
               </button>
+              {note.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {note.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full bg-[var(--gridline)] px-2 py-0.5 text-[11px] font-medium text-[var(--text-secondary)]"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => handleRemove(note)}
