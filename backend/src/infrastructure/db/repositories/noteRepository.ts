@@ -1,6 +1,6 @@
 import type { Pool } from "pg";
 import type { NoteRepository } from "../../../domain/ports.js";
-import type { NewNote, Note } from "../../../domain/types.js";
+import type { Note } from "../../../domain/types.js";
 
 interface NoteRow {
   id: string;
@@ -26,7 +26,7 @@ export function createNoteRepository(pool: Pool): NoteRepository {
       return rows[0] ? toNote(rows[0]) : null;
     },
 
-    create: async (input: NewNote) => {
+    create: async (input) => {
       const { rows } = await pool.query<NoteRow>(
         "insert into notes (title, content) values ($1, $2) returning *",
         [input.title, input.content],
@@ -34,7 +34,7 @@ export function createNoteRepository(pool: Pool): NoteRepository {
       return toNote(rows[0]);
     },
 
-    update: async (id, input: NewNote) => {
+    update: async (id, input) => {
       const { rows } = await pool.query<NoteRow>(
         "update notes set title = $2, content = $3, updated_at = now() where id = $1 returning *",
         [id, input.title, input.content],

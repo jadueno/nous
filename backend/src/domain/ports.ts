@@ -1,10 +1,18 @@
-import type { NewNote, Note, RetrievedChunk } from "./types.js";
+import type { Note, RetrievedChunk } from "./types.js";
+
+/** El repositorio siempre persiste título + contenido (columnas reales de la tabla);
+ * es el caso de uso quien deriva el título a partir del contenido antes de llamarlo
+ * — el repositorio no sabe nada de esa regla de negocio. */
+interface StoredNote {
+  title: string;
+  content: string;
+}
 
 export interface NoteRepository {
   list(): Promise<Note[]>;
   get(id: string): Promise<Note | null>;
-  create(note: NewNote): Promise<Note>;
-  update(id: string, note: NewNote): Promise<Note | null>;
+  create(note: StoredNote): Promise<Note>;
+  update(id: string, note: StoredNote): Promise<Note | null>;
   remove(id: string): Promise<void>;
 }
 
@@ -29,6 +37,21 @@ export interface EmbeddingProvider {
 export interface LLMProvider {
   /** Genera una respuesta a partir de la pregunta y los trozos de contexto recuperados. */
   answer(question: string, context: RetrievedChunk[]): Promise<string>;
+}
+
+const MAX_TITLE_LENGTH = 80;
+
+/** Deriva el título a mostrar (lista de notas, citas del chat) de la primera línea
+ * con contenido, truncada si es muy larga. Sin campo de título aparte que rellenar:
+ * una nota rápida es solo texto, y el título siempre refleja el contenido actual
+ * (no puede quedarse desactualizado como pasaría con un campo editado a mano). */
+export function deriveTitle(content: string): string {
+  const firstLine = content
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.length > 0);
+  if (!firstLine) return "Sin título";
+  return firstLine.length > MAX_TITLE_LENGTH ? `${firstLine.slice(0, MAX_TITLE_LENGTH).trim()}…` : firstLine;
 }
 
 /** Trocea el contenido de una nota en fragmentos manejables para vectorizar. Vive en el

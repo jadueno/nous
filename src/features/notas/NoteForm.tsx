@@ -5,7 +5,8 @@ import { Field, inputClass } from "../../components/Field";
 import type { NewNote, Note } from "../../data/types";
 
 /** Formulario de crear/editar nota: mismo componente para ambos casos, distinguidos por
- * si se recibe `initialNote`. */
+ * si se recibe `initialNote`. Un solo campo de contenido — el título se deriva solo de
+ * la primera línea, así que no hay nada más que rellenar para una nota rápida. */
 export function NoteForm({
   initialNote,
   onSubmit,
@@ -15,7 +16,6 @@ export function NoteForm({
   onSubmit: (note: NewNote) => Promise<void>;
   onCancel: () => void;
 }) {
-  const [title, setTitle] = useState(initialNote?.title ?? "");
   const [content, setContent] = useState(initialNote?.content ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +25,7 @@ export function NoteForm({
     setSubmitting(true);
     setError(null);
     try {
-      await onSubmit({ title: title.trim(), content });
+      await onSubmit({ content });
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se ha podido guardar la nota");
     } finally {
@@ -39,18 +39,10 @@ export function NoteForm({
         <h2 className="text-sm font-semibold text-[var(--text-primary)]">
           {initialNote ? "Editar nota" : "Nueva nota"}
         </h2>
-        <Field label="Título">
-          <input
-            required
-            autoFocus
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Contenido" hint="Markdown plano, sin formato visual.">
+        <Field label="Contenido" hint="Markdown plano. La primera línea es el título.">
           <textarea
             required
+            autoFocus
             rows={9}
             value={content}
             onChange={(e) => setContent(e.target.value)}

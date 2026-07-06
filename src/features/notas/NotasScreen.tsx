@@ -18,8 +18,13 @@ function formatUpdated(iso: string): string {
   }).format(new Date(iso));
 }
 
+// La primera línea con contenido ya se muestra aparte como título (ver deriveTitle
+// en el backend) — la preview arranca en la línea siguiente para no repetirla.
 function preview(content: string): string {
-  const text = content.trim().split("\n").slice(0, 3).join(" ");
+  const lines = content.trim().split("\n");
+  const firstNonEmpty = lines.findIndex((l) => l.trim().length > 0);
+  const rest = firstNonEmpty === -1 ? [] : lines.slice(firstNonEmpty + 1);
+  const text = rest.slice(0, 3).join(" ").trim();
   return text.length > 180 ? `${text.slice(0, 180)}…` : text;
 }
 

@@ -6,7 +6,8 @@ export interface Note {
   updatedAt: string;
 }
 
-export type NewNote = Pick<Note, "title" | "content">;
+/** Sin campo de título: el backend lo deriva de la primera línea del contenido. */
+export type NewNote = Pick<Note, "content">;
 
 export interface Citation {
   noteId: string;

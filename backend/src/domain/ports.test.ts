@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chunkText } from "./ports.js";
+import { chunkText, deriveTitle } from "./ports.js";
 
 describe("chunkText", () => {
   it("con un texto corto, devuelve un único trozo", () => {
@@ -17,5 +17,22 @@ describe("chunkText", () => {
 
   it("con contenido vacío, no devuelve trozos vacíos", () => {
     expect(chunkText("   ")).toEqual([]);
+  });
+});
+
+describe("deriveTitle", () => {
+  it("usa la primera línea con contenido, ignorando líneas vacías al principio", () => {
+    expect(deriveTitle("\n\n  Comida que le gusta a Flor\nLe gusta el McDonald's")).toBe(
+      "Comida que le gusta a Flor",
+    );
+  });
+
+  it("trunca líneas muy largas a 80 caracteres con puntos suspensivos", () => {
+    const longLine = "a".repeat(100);
+    expect(deriveTitle(longLine)).toBe(`${"a".repeat(80)}…`);
+  });
+
+  it("con contenido en blanco, devuelve un título de reserva en vez de una cadena vacía", () => {
+    expect(deriveTitle("   \n  ")).toBe("Sin título");
   });
 });

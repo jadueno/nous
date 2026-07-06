@@ -1,10 +1,9 @@
 import type { ChunkRepository, EmbeddingProvider, NoteRepository } from "../domain/ports.js";
-import { chunkText } from "../domain/ports.js";
+import { chunkText, deriveTitle } from "../domain/ports.js";
 import type { NewNote, Note } from "../domain/types.js";
 
-function validate(note: NewNote): void {
-  if (!note.title.trim()) throw new Error("El título no puede estar vacío");
-  if (!note.content.trim()) throw new Error("El contenido no puede estar vacío");
+function validate(content: string): void {
+  if (!content.trim()) throw new Error("El contenido no puede estar vacío");
 }
 
 /** Trocea y vectoriza el contenido de una nota, sustituyendo sus trozos anteriores.
@@ -41,15 +40,15 @@ export function createNoteUseCases(
     get: (id: string): Promise<Note | null> => noteRepository.get(id),
 
     create: async (input: NewNote): Promise<Note> => {
-      validate(input);
-      const note = await noteRepository.create(input);
+      validate(input.content);
+      const note = await noteRepository.create({ title: deriveTitle(input.content), content: input.content });
       await ingestNote(note, chunkRepository, embeddingProvider);
       return note;
     },
 
     update: async (id: string, input: NewNote): Promise<Note | null> => {
-      validate(input);
-      const note = await noteRepository.update(id, input);
+      validate(input.content);
+      const note = await noteRepository.update(id, { title: deriveTitle(input.content), content: input.content });
       if (!note) return null;
       await ingestNote(note, chunkRepository, embeddingProvider);
       return note;

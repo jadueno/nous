@@ -55,11 +55,10 @@ describe("NotasScreen", () => {
 
     await screen.findByText("Todavía no tienes ninguna nota. Escribe la primera.");
     await user.click(screen.getByRole("button", { name: "+ Nueva nota" }));
-    await user.type(screen.getByLabelText("Título"), "Receta de pan");
-    await user.type(screen.getByLabelText(/Contenido/), "Harina, agua, sal y levadura.");
+    await user.type(screen.getByLabelText(/Contenido/), "Receta de pan\nHarina, agua, sal y levadura.");
     await user.click(screen.getByRole("button", { name: "Crear nota" }));
 
-    expect(notesApi.create).toHaveBeenCalledWith({ title: "Receta de pan", content: "Harina, agua, sal y levadura." });
+    expect(notesApi.create).toHaveBeenCalledWith({ content: "Receta de pan\nHarina, agua, sal y levadura." });
     expect(await screen.findByText("Receta de pan")).toBeInTheDocument();
   });
 

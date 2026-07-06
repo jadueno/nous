@@ -3,10 +3,9 @@ import { expect, test } from "@playwright/test";
 test("pregunta al chat y la respuesta cita la nota de origen", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "+ Nueva nota" }).click();
-  await page.getByLabel("Título").fill("Receta de pan E2E");
   await page
     .getByLabel(/Contenido/)
-    .fill("Para el pan casero hace falta harina, agua, sal y levadura de panadería.");
+    .fill("Receta de pan E2E\nPara el pan casero hace falta harina, agua, sal y levadura de panadería.");
   await page.getByRole("button", { name: "Crear nota" }).click();
   await expect(page.getByRole("heading", { name: "Receta de pan E2E" })).toBeVisible();
 

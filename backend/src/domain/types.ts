@@ -6,7 +6,9 @@ export interface Note {
   updatedAt: string;
 }
 
-export type NewNote = Pick<Note, "title" | "content">;
+/** Sin campo de título: se deriva de la primera línea del contenido (ver
+ * `deriveTitle` en ports.ts) — una nota rápida es solo texto, sin nada más que rellenar. */
+export type NewNote = Pick<Note, "content">;
 
 /** Un trozo de una nota, ya vectorizado. El embedding vive en infraestructura
  * (columna vector en Postgres/pgvector) — el dominio solo conoce su existencia

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ChunkRepository, EmbeddingProvider, NoteRepository } from "../domain/ports.js";
-import type { NewNote, Note } from "../domain/types.js";
+import type { Note } from "../domain/types.js";
 import { createNoteUseCases } from "./notes.js";
 
 function fakeNoteRepository(): NoteRepository {
@@ -9,7 +9,7 @@ function fakeNoteRepository(): NoteRepository {
   return {
     list: async () => [...notes.values()],
     get: async (id) => notes.get(id) ?? null,
-    create: async (input: NewNote) => {
+    create: async (input) => {
       const note: Note = { id: `n${++counter}`, ...input, createdAt: "2026-01-01", updatedAt: "2026-01-01" };
       notes.set(note.id, note);
       return note;
@@ -50,12 +50,12 @@ const fakeEmbeddingProvider: EmbeddingProvider = {
 };
 
 describe("createNoteUseCases", () => {
-  it("crear una nota válida la vectoriza (trocea + embebe)", async () => {
+  it("crear una nota válida la vectoriza (trocea + embebe) y deriva el título de la primera línea", async () => {
     const noteRepository = fakeNoteRepository();
     const chunkRepository = fakeChunkRepository();
     const useCases = createNoteUseCases(noteRepository, chunkRepository, fakeEmbeddingProvider);
 
-    const note = await useCases.create({ title: "Primera nota", content: "Contenido de prueba" });
+    const note = await useCases.create({ content: "Primera nota\nResto del contenido de prueba" });
 
     expect(note.title).toBe("Primera nota");
     expect(chunkRepository.calls).toEqual([{ noteId: note.id, count: 1 }]);
@@ -67,18 +67,33 @@ describe("createNoteUseCases", () => {
     const embedSpy = vi.fn(async (texts: string[]) => texts.map(() => [0, 0, 0]));
     const useCases = createNoteUseCases(noteRepository, chunkRepository, { embed: embedSpy });
 
-    await useCases.create({ title: "Comida que le gusta a Flor", content: "Le gusta el McDonald's" });
+    await useCases.create({ content: "Comida que le gusta a Flor\nLe gusta el McDonald's" });
 
-    expect(embedSpy).toHaveBeenCalledWith(["Comida que le gusta a Flor\n\nLe gusta el McDonald's"]);
-    expect(chunkRepository.storedChunks).toEqual([{ content: "Le gusta el McDonald's", position: 0 }]);
+    expect(embedSpy).toHaveBeenCalledWith([
+      "Comida que le gusta a Flor\n\nComida que le gusta a Flor\nLe gusta el McDonald's",
+    ]);
+    expect(chunkRepository.storedChunks).toEqual([
+      { content: "Comida que le gusta a Flor\nLe gusta el McDonald's", position: 0 },
+    ]);
   });
 
-  it("rechaza una nota con título vacío sin llegar a vectorizar nada", async () => {
+  it("una nota de una sola línea muy larga trunca el título derivado", async () => {
     const noteRepository = fakeNoteRepository();
     const chunkRepository = fakeChunkRepository();
     const useCases = createNoteUseCases(noteRepository, chunkRepository, fakeEmbeddingProvider);
 
-    await expect(useCases.create({ title: "  ", content: "Algo" })).rejects.toThrow("título");
+    const longLine = "a".repeat(100);
+    const note = await useCases.create({ content: longLine });
+
+    expect(note.title).toBe(`${"a".repeat(80)}…`);
+  });
+
+  it("rechaza una nota con contenido vacío sin llegar a vectorizar nada", async () => {
+    const noteRepository = fakeNoteRepository();
+    const chunkRepository = fakeChunkRepository();
+    const useCases = createNoteUseCases(noteRepository, chunkRepository, fakeEmbeddingProvider);
+
+    await expect(useCases.create({ content: "   " })).rejects.toThrow("contenido");
     expect(chunkRepository.calls).toEqual([]);
   });
 
@@ -88,7 +103,7 @@ describe("createNoteUseCases", () => {
     const removeSpy = vi.spyOn(chunkRepository, "removeForNote");
     const useCases = createNoteUseCases(noteRepository, chunkRepository, fakeEmbeddingProvider);
 
-    const note = await useCases.create({ title: "Nota", content: "X" });
+    const note = await useCases.create({ content: "Nota\nX" });
     await useCases.remove(note.id);
 
     expect(removeSpy).toHaveBeenCalledWith(note.id);

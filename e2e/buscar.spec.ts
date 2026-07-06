@@ -3,8 +3,7 @@ import { expect, test } from "@playwright/test";
 test("la búsqueda semántica encuentra el fragmento relevante", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "+ Nueva nota" }).click();
-  await page.getByLabel("Título").fill("Notas de viaje E2E");
-  await page.getByLabel(/Contenido/).fill("Fuimos a la playa en verano y comimos marisco fresco.");
+  await page.getByLabel(/Contenido/).fill("Notas de viaje E2E\nFuimos a la playa en verano y comimos marisco fresco.");
   await page.getByRole("button", { name: "Crear nota" }).click();
   await expect(page.getByRole("heading", { name: "Notas de viaje E2E" })).toBeVisible();
 
