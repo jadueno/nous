@@ -1,0 +1,27 @@
+services:
+  db:
+    # pgvector/pgvector añade la extensión "vector" sobre Postgres 17 estándar —
+    # necesaria para la búsqueda por similitud (embeddings) sin un servicio de BD
+    # vectorial aparte: mantiene el despliegue tan ligero como el de un Postgres normal.
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nous}
+      POSTGRES_USER: ${POSTGRES_USER:-nous}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en tu .env (copia .env.example y pon una contraseña propia)}
+    ports:
+      - "${POSTGRES_PORT:-5434}:5432"
+    volumes:
+      - nous-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nous}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  # Nombre real fijado explícitamente (no external:, eso rompería clones nuevos): si
+  # se renombra la carpeta del proyecto más adelante, Compose reutiliza este volumen
+  # en vez de crear uno nuevo vacío y dejar el actual huérfano.
+  nous-db:
+    name: nous_nous-db

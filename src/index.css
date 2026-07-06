@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  /* Tema oscuro fijo (no depende de prefers-color-scheme), identidad propia (no la de Rumbo). */
+  --page: #0a0e14;
+  --surface-1: #12171f;
+  --surface-2: #1a212c;
+  --text-primary: #f2f4f8;
+  --text-secondary: #c3cad6;
+  --text-muted: #8792a3;
+  --gridline: #232b38;
+  --border: rgba(255, 255, 255, 0.1);
+
+  /* Acentos de marca: índigo (IA/intelecto) + teal (fuente verificada/citada) sobre
+     una base neutra blanco/negro (--ink/--page), mismo lenguaje que Rumbo pero paleta
+     propia — dos únicos acentos "vivos", el resto de la interfaz es neutra. */
+  --ink: var(--text-primary);
+  --on-ink: var(--page);
+  --accent-indigo: #818cf8;
+  --on-accent-indigo: #10121f;
+  --accent-teal: #2dd4bf;
+  --on-accent-teal: #08201c;
+
+  --status-good: #22c55e;
+  --status-warning: #eab308;
+  --status-serious: #f97316;
+  --status-critical: #ef4444;
+  --on-status-good: #08200e;
+  --on-status-warning: #201a08;
+  --on-status-critical: #ffffff;
+
+  --shadow-tint: 0, 0, 0;
+}
+
+html {
+  color-scheme: dark;
+  overflow-x: hidden;
+}
+
+/* overflow-x sólo en html, no en body: ponerlo también en body fuerza su overflow-y a
+   "auto" (si un eje no es "visible", el otro deja de serlo), convirtiéndolo en su
+   propio scroll container y rompiendo position:sticky en sus descendientes. */
+body {
+  margin: 0;
+  overscroll-behavior-x: none;
+  background: var(--page);
+  color: var(--text-primary);
+  font-feature-settings: "tnum" 1;
+}
+
+@utility shadow-card {
+  box-shadow: 0 1px 2px rgba(var(--shadow-tint), 0.05);
+}
+
+@utility shadow-card-hover {
+  box-shadow: 0 4px 12px -4px rgba(var(--shadow-tint), 0.14);
+}
+
+@utility shadow-float {
+  box-shadow:
+    0 2px 8px rgba(var(--shadow-tint), 0.08),
+    0 12px 28px -10px rgba(var(--shadow-tint), 0.2);
+}
