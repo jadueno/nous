@@ -48,6 +48,36 @@ describe("createAskUseCase", () => {
     ]);
   });
 
+  it("si todo el contexto recuperado está por debajo del umbral de relevancia, no lo cita ni llama al LLM", async () => {
+    const context: RetrievedChunk[] = [
+      { chunk: { id: "c1", noteId: "n1", content: "Fragmento ajeno", position: 0 }, noteTitle: "Nota ajena", score: 0.05 },
+    ];
+    const chunkRepository = chunkRepositoryReturning(context);
+    let llmCalled = false;
+    const llmProvider: LLMProvider = { answer: async () => ((llmCalled = true), "no debería llamarse") };
+    const useCase = createAskUseCase(chunkRepository, fakeEmbeddingProvider, llmProvider);
+
+    const answer = await useCase.ask("¿Algo totalmente distinto?");
+
+    expect(llmCalled).toBe(false);
+    expect(answer.citations).toEqual([]);
+    expect(answer.text).toMatch(/no he encontrado ninguna nota relevante/i);
+  });
+
+  it("descarta del contexto los trozos por debajo del umbral, aunque otros sí lo superen", async () => {
+    const context: RetrievedChunk[] = [
+      { chunk: { id: "c1", noteId: "n1", content: "Relevante", position: 0 }, noteTitle: "Nota relevante", score: 0.9 },
+      { chunk: { id: "c2", noteId: "n2", content: "Ruido", position: 0 }, noteTitle: "Nota ajena", score: 0.05 },
+    ];
+    const chunkRepository = chunkRepositoryReturning(context);
+    const llmProvider: LLMProvider = { answer: async () => "Respuesta generada" };
+    const useCase = createAskUseCase(chunkRepository, fakeEmbeddingProvider, llmProvider);
+
+    const answer = await useCase.ask("¿Qué apunté sobre X?");
+
+    expect(answer.citations).toEqual([{ noteId: "n1", noteTitle: "Nota relevante", excerpt: "Relevante" }]);
+  });
+
   it("rechaza una pregunta vacía", async () => {
     const chunkRepository = chunkRepositoryReturning([]);
     const llmProvider: LLMProvider = { answer: async () => "" };

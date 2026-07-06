@@ -6,6 +6,18 @@ Tu segundo cerebro personal autoalojado: escribe notas y pregúntales en lenguaj
 
 📐 Arquitectura, decisiones técnicas y aprendizajes en **[ARCHITECTURE.md](ARCHITECTURE.md)**.
 
+## Capturas
+
+Datos ficticios de ejemplo.
+
+| Notas (escritorio) | Chat con citas (escritorio) | Notas (móvil) |
+| --- | --- | --- |
+| ![Notas](docs/screenshots/notas-desktop.png) | ![Chat](docs/screenshots/chat-desktop.png) | ![Notas en móvil](docs/screenshots/notas-movil.png) |
+
+**Búsqueda semántica** — encuentra fragmentos por significado, no solo por palabra exacta (nótese el 0% de similitud en las notas sin relación con la búsqueda):
+
+![Buscar](docs/screenshots/buscar-desktop.png)
+
 ## Por qué
 
 Las alternativas cloud (Notion AI, Mem, Tana) no te dejan ser dueño de tus datos; las autoalojadas open-source (Khoj, Onyx, Quivr) están pensadas para equipos, con arquitecturas pesadas para un uso genuinamente personal. Nous es ligero (Postgres + `pgvector`, sin servicio de BD vectorial aparte), autoalojado, y con el proveedor de IA (embeddings + LLM) intercambiable por diseño — funciona sin ninguna clave de API configurada (respuestas simuladas) y con Claude + Voyage AI en cuanto añades las tuyas.
