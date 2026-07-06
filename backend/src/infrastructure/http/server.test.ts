@@ -117,20 +117,6 @@ describe("POST /ask", () => {
   });
 });
 
-describe("GET /search", () => {
-  it("devuelve los trozos más similares a la búsqueda", async () => {
-    await app.inject({
-      method: "POST",
-      url: "/notes",
-      payload: { content: "Notas de viaje\nFuimos a la playa en verano y comimos marisco fresco." },
-    });
-
-    const res = await app.inject({ method: "GET", url: "/search?q=playa marisco" });
-    expect(res.statusCode).toBe(200);
-    expect(res.json()[0]).toMatchObject({ noteTitle: "Notas de viaje" });
-  });
-});
-
 describe("autenticación opcional (API_TOKEN), de extremo a extremo con el servidor real", () => {
   it("con apiToken configurado, exige el token también en las rutas ya montadas", async () => {
     const authedApp = await buildServer(pool, createFakeEmbeddingProvider(), createFakeLLMProvider(), {

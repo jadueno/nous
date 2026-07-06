@@ -1,17 +1,15 @@
 import { useState, type ComponentType, type SVGProps } from "react";
 import { BrandMark } from "./components/BrandMark";
 import { ConfirmProvider } from "./components/ConfirmProvider";
-import { ChatIcon, NotesIcon, SearchIcon } from "./components/icons";
+import { ChatIcon, NotesIcon } from "./components/icons";
 import { ChatScreen } from "./features/chat/ChatScreen";
-import { BuscarScreen } from "./features/buscar/BuscarScreen";
 import { NotasScreen } from "./features/notas/NotasScreen";
 
-type Section = "notas" | "chat" | "buscar";
+type Section = "notas" | "chat";
 
 const sections: { id: Section; label: string; icon: ComponentType<SVGProps<SVGSVGElement>> }[] = [
   { id: "notas", label: "Notas", icon: NotesIcon },
   { id: "chat", label: "Chat", icon: ChatIcon },
-  { id: "buscar", label: "Buscar", icon: SearchIcon },
 ];
 
 export default function App() {
@@ -51,7 +49,6 @@ export default function App() {
           <div className="mx-auto max-w-4xl">
             {section === "notas" && <NotasScreen />}
             {section === "chat" && <ChatScreen />}
-            {section === "buscar" && <BuscarScreen />}
           </div>
         </main>
 

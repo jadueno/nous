@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { Field, inputClass } from "../../components/Field";
-import { ChatIcon, QuoteIcon, SparkleIcon } from "../../components/icons";
+import { ChatIcon, SparkleIcon } from "../../components/icons";
 import { askApi } from "../../data/api";
 import type { Answer } from "../../data/types";
 
@@ -36,9 +36,7 @@ export function ChatScreen() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">Chat</h1>
-        <p className="text-sm text-[var(--text-secondary)]">
-          Pregúntale a tus notas. Cada respuesta cita la nota exacta de la que viene.
-        </p>
+        <p className="text-sm text-[var(--text-secondary)]">Pregúntale a tus notas, en lenguaje natural.</p>
       </div>
 
       <Card>
@@ -97,63 +95,20 @@ export function ChatScreen() {
       )}
 
       {status === "done" && answer && (
-        <div className="flex flex-col gap-4">
-          <Card
-            style={{
-              borderColor: "var(--accent-indigo)",
-              backgroundColor: "color-mix(in srgb, var(--accent-indigo) 6%, var(--surface-1))",
-            }}
-          >
-            <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: "var(--accent-indigo)" }}>
-              <SparkleIcon className="size-4" />
-              Respuesta a "{askedQuestion}"
-            </div>
-            <p className="mt-2 text-[15px] leading-relaxed whitespace-pre-wrap text-[var(--text-primary)]">
-              {answer.text}
-            </p>
-          </Card>
-
-          <div>
-            <h2 className="mb-2 text-sm font-semibold text-[var(--text-secondary)]">
-              {answer.citations.length > 0
-                ? `Citado de ${answer.citations.length} nota${answer.citations.length === 1 ? "" : "s"}`
-                : "Fuentes citadas"}
-            </h2>
-
-            {answer.citations.length === 0 ? (
-              <Card
-                style={{
-                  borderColor: "var(--status-warning)",
-                  backgroundColor: "color-mix(in srgb, var(--status-warning) 8%, var(--surface-1))",
-                }}
-              >
-                <p className="text-sm" style={{ color: "var(--status-warning)" }}>
-                  Esta respuesta no cita ninguna nota. Puede que todavía no tengas notas guardadas, o que ninguna sea
-                  relevante para esta pregunta.
-                </p>
-              </Card>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {answer.citations.map((citation, i) => (
-                  <Card
-                    key={`${citation.noteId}-${i}`}
-                    className="flex flex-col gap-2"
-                    style={{ borderColor: "color-mix(in srgb, var(--accent-teal) 30%, var(--border))" }}
-                  >
-                    <div
-                      className="flex items-center gap-1.5 text-xs font-semibold"
-                      style={{ color: "var(--accent-teal)" }}
-                    >
-                      <QuoteIcon className="size-3.5" />
-                      {citation.noteTitle}
-                    </div>
-                    <p className="text-sm text-[var(--text-secondary)] italic">"{citation.excerpt}"</p>
-                  </Card>
-                ))}
-              </div>
-            )}
+        <Card
+          style={{
+            borderColor: "var(--accent-indigo)",
+            backgroundColor: "color-mix(in srgb, var(--accent-indigo) 6%, var(--surface-1))",
+          }}
+        >
+          <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: "var(--accent-indigo)" }}>
+            <SparkleIcon className="size-4" />
+            Respuesta a "{askedQuestion}"
           </div>
-        </div>
+          <p className="mt-2 text-[15px] leading-relaxed whitespace-pre-wrap text-[var(--text-primary)]">
+            {answer.text}
+          </p>
+        </Card>
       )}
     </div>
   );

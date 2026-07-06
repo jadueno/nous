@@ -5,12 +5,10 @@ import rateLimit from "@fastify/rate-limit";
 import type { Pool } from "pg";
 import { createNoteUseCases } from "../../application/notes.js";
 import { createAskUseCase } from "../../application/ask.js";
-import { createSearchUseCase } from "../../application/search.js";
 import type { EmbeddingProvider, LLMProvider } from "../../domain/ports.js";
 import { registerAuth } from "./auth.js";
 import { registerNoteRoutes } from "./noteRoutes.js";
 import { registerAskRoutes } from "./askRoutes.js";
-import { registerSearchRoutes } from "./searchRoutes.js";
 import { createNoteRepository } from "../db/repositories/noteRepository.js";
 import { createChunkRepository } from "../db/repositories/chunkRepository.js";
 
@@ -39,7 +37,6 @@ export async function buildServer(
 
   registerNoteRoutes(app, createNoteUseCases(noteRepository, chunkRepository, embeddingProvider));
   registerAskRoutes(app, createAskUseCase(chunkRepository, embeddingProvider, llmProvider));
-  registerSearchRoutes(app, createSearchUseCase(chunkRepository, embeddingProvider));
 
   return app;
 }

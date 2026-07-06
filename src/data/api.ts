@@ -1,4 +1,4 @@
-import type { Answer, NewNote, Note, RetrievedChunk } from "./types";
+import type { Answer, NewNote, Note } from "./types";
 
 // Usa el mismo host desde el que se cargó la página (localhost, IP de LAN o de
 // Tailscale) en vez de "localhost" fijo, que en el móvil apuntaría al propio móvil.
@@ -37,8 +37,4 @@ export const tagsApi = {
 
 export const askApi = {
   ask: (question: string) => request<Answer>("/ask", { method: "POST", body: JSON.stringify({ question }) }),
-};
-
-export const searchApi = {
-  search: (query: string) => request<RetrievedChunk[]>(`/search?q=${encodeURIComponent(query)}`),
 };

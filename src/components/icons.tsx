@@ -31,15 +31,6 @@ export function ChatIcon(props: IconProps) {
   );
 }
 
-export function SearchIcon(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <circle cx="10.5" cy="10.5" r="6.5" />
-      <path d="m20 20-4.8-4.8" />
-    </svg>
-  );
-}
-
 export function SparkleIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -48,16 +39,6 @@ export function SparkleIcon(props: IconProps) {
       <path d="M3 12h4" />
       <path d="M17 12h4" />
       <path d="M12 8.5c0 2-1.5 3.5-3.5 3.5 2 0 3.5 1.5 3.5 3.5 0-2 1.5-3.5 3.5-3.5-2 0-3.5-1.5-3.5-3.5Z" />
-    </svg>
-  );
-}
-
-/** Marca de cita, para señalar visualmente un fragmento anclado a una nota concreta. */
-export function QuoteIcon(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <path d="M5 9.5c0-1.4 1.1-2.5 2.5-2.5v2c-.3 0-.5.2-.5.5v.5h1.5v4H5v-4.5Z" fill="currentColor" stroke="none" />
-      <path d="M13 9.5c0-1.4 1.1-2.5 2.5-2.5v2c-.3 0-.5.2-.5.5v.5h1.5v4H13v-4.5Z" fill="currentColor" stroke="none" />
     </svg>
   );
 }

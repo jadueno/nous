@@ -2,7 +2,7 @@ function SkeletonBlock({ className = "" }: { className?: string }) {
   return <div className={`skeleton-shimmer rounded-lg bg-[var(--gridline)] ${className}`} />;
 }
 
-/** Skeleton de carga para listas de tarjetas (Notas, Buscar), mientras llega la
+/** Skeleton de carga para listas de tarjetas (Notas), mientras llega la
  * respuesta del backend. */
 export function ListSkeleton({
   count = 3,

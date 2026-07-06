@@ -4,7 +4,7 @@ Este documento explica cómo está construida la aplicación y por qué, pensado
 
 ## Visión general
 
-Nous es un asistente personal de notas con búsqueda semántica: escribes notas, y puedes preguntarles en lenguaje natural — la respuesta cita siempre la nota de origen (RAG con citas, no un chat genérico "con IA encima").
+Nous es un asistente personal de notas: escribes notas, y puedes preguntarles en lenguaje natural — la respuesta la genera un modelo real (RAG con IA local por defecto), anclada a lo que hay en tus notas, no un chat genérico inventándoselo.
 
 ```
 Frontend (React + TS)  ──HTTP/JSON──▶  Backend (Fastify + TS)  ──SQL──▶  PostgreSQL + pgvector
@@ -26,7 +26,7 @@ Frontend (React + TS)  ──HTTP/JSON──▶  Backend (Fastify + TS)  ──S
 ```
 backend/src/
   domain/           tipos + puertos (EmbeddingProvider, LLMProvider, repositorios) + chunkText() — cero dependencias externas
-  application/       casos de uso: notes (CRUD + vectorizar), ask (RAG con citas), search (búsqueda semántica directa)
+  application/       casos de uso: notes (CRUD + vectorizar), ask (RAG: recupera contexto relevante y genera la respuesta)
   infrastructure/
     db/             pool de conexión, migraciones, repositorios Postgres/pgvector
     llm/            adaptadores: FakeProvider (tests), OllamaProvider (local, por defecto), VoyageEmbeddingProvider + AnthropicLLMProvider (opcionales, de pago)
@@ -36,6 +36,8 @@ backend/src/
 **El proveedor de IA es un puerto, no un detalle de infraestructura fijo.** `EmbeddingProvider` y `LLMProvider` son dos puertos independientes (Anthropic no ofrece embeddings, así que la pareja de pago sería Voyage AI + Claude) — el dominio y los casos de uso no saben ni les importa si detrás hay un modelo local (Ollama), una API de pago o el `FakeProvider` determinista que usan los tests. Orden de prioridad en `index.ts`: claves de pago (`ANTHROPIC_API_KEY`/`VOYAGE_API_KEY`) > Ollama local (`OLLAMA_BASE_URL`) > `FakeProvider` (nada configurado).
 
 **Por qué Ollama y no una API de pago, para este proyecto en concreto**: RAG sobre notas *privadas* de una sola persona no tiene la misma justificación de coste que en una empresa (donde el gasto en IA se compensa con ahorro/ingreso) — pagar por token para buscar en las propias notas no compensaba. Un modelo local en el Mac mini (M4, 16GB) da respuestas reales y con comprensión semántica de verdad, sin factura ni clave de API, y refuerza la propuesta de valor central del proyecto (dueño de tus datos: ni siquiera el proveedor de IA los ve).
+
+**Por qué el chat ya no enseña citas ni existe una pantalla de "Buscar" separada**: la primera versión sí mostraba, debajo de la respuesta, las notas de origen y un buscador semántico directo — pensado como la "prueba" de que la respuesta estaba anclada a algo real. En uso real, con un modelo generando de verdad (Ollama), ese andamiaje sobraba: rompía la sensación de conversación natural sin aportar nada que el usuario fuera a usar. El backend sigue calculando y filtrando por relevancia el contexto recuperado antes de pasarlo al LLM (`MIN_RELEVANCE_SCORE` en `application/ask.ts`) — el anclaje a las notas reales sigue existiendo, solo que ya no se enseña en la interfaz.
 
 ## Decisiones de testing
 

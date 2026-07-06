@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/jadueno/nous/actions/workflows/ci.yml/badge.svg)](https://github.com/jadueno/nous/actions/workflows/ci.yml)
 
-Tu segundo cerebro personal autoalojado: escribe notas y pregúntales en lenguaje natural — las respuestas citan siempre la nota de origen (RAG de verdad, no un buscador con IA encima).
+Tu segundo cerebro personal autoalojado: escribe notas y pregúntales en lenguaje natural — respuestas generadas de verdad (RAG con IA local, no un buscador con plantillas encima), ancladas siempre a lo que hay realmente en tus notas.
 
 📐 Arquitectura, decisiones técnicas y aprendizajes en **[ARCHITECTURE.md](ARCHITECTURE.md)**.
 
@@ -10,13 +10,9 @@ Tu segundo cerebro personal autoalojado: escribe notas y pregúntales en lenguaj
 
 Datos ficticios de ejemplo.
 
-| Notas (escritorio) | Chat con citas (escritorio) | Notas (móvil) |
+| Notas (escritorio) | Chat (escritorio) | Notas (móvil) |
 | --- | --- | --- |
 | ![Notas](docs/screenshots/notas-desktop.png) | ![Chat](docs/screenshots/chat-desktop.png) | ![Notas en móvil](docs/screenshots/notas-movil.png) |
-
-**Búsqueda semántica** — encuentra fragmentos por significado, no solo por palabra exacta (nótese el 0% de similitud en las notas sin relación con la búsqueda):
-
-![Buscar](docs/screenshots/buscar-desktop.png)
 
 ## Por qué
 

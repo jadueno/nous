@@ -2,12 +2,11 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { focusRing } from "./Field";
 
 /**
- * Solo cuatro tonos de marca, deliberadamente pocos: "ink" es la acción principal por
+ * Solo tres tonos de marca, deliberadamente pocos: "ink" es la acción principal por
  * defecto de cualquier pantalla o formulario; "indigo" se reserva para la acción que
- * dispara una respuesta generada por IA (Chat); "teal" para la que dispara una
- * recuperación directa de fuentes (Buscar); "critical" para confirmar un borrado.
+ * dispara una respuesta generada por IA (Chat); "critical" para confirmar un borrado.
  */
-export type ButtonTone = "ink" | "indigo" | "teal" | "critical";
+export type ButtonTone = "ink" | "indigo" | "critical";
 
 /**
  * "solid": botón principal, píldora rellena.
@@ -28,7 +27,6 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const toneVars: Record<ButtonTone, { bg: string; fg: string }> = {
   ink: { bg: "var(--ink)", fg: "var(--on-ink)" },
   indigo: { bg: "var(--accent-indigo)", fg: "var(--on-accent-indigo)" },
-  teal: { bg: "var(--accent-teal)", fg: "var(--on-accent-teal)" },
   critical: { bg: "var(--status-critical)", fg: "var(--on-status-critical)" },
 };
 

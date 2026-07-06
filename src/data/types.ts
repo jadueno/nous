@@ -20,9 +20,3 @@ export interface Answer {
   text: string;
   citations: Citation[];
 }
-
-export interface RetrievedChunk {
-  chunk: { id: string; noteId: string; content: string; position: number };
-  noteTitle: string;
-  score: number;
-}

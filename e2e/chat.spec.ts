@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("pregunta al chat y la respuesta cita la nota de origen", async ({ page }) => {
+test("pregunta al chat y muestra la respuesta generada", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "+ Nueva nota" }).click();
   await page
@@ -13,6 +13,5 @@ test("pregunta al chat y la respuesta cita la nota de origen", async ({ page }) 
   await page.getByLabel("Tu pregunta").fill("¿Qué hace falta para el pan casero?");
   await page.getByRole("button", { name: "Preguntar" }).click();
 
-  await expect(page.getByText(/Respuesta a/)).toBeVisible();
-  await expect(page.getByText("Receta de pan E2E", { exact: true })).toBeVisible();
+  await expect(page.getByText('Respuesta a "¿Qué hace falta para el pan casero?"')).toBeVisible();
 });
