@@ -8,17 +8,24 @@ function validate(note: NewNote): void {
 }
 
 /** Trocea y vectoriza el contenido de una nota, sustituyendo sus trozos anteriores.
- * Se llama tras crear/editar — así la búsqueda semántica y el chat quedan al día. */
+ * Se llama tras crear/editar — así la búsqueda semántica y el chat quedan al día.
+ *
+ * El título se antepone SOLO para calcular el embedding, nunca se guarda en
+ * `content` del trozo: muchas notas cortas (p. ej. "Comida que le gusta a X" con
+ * contenido "Le gusta el McDonald's") llevan la mayor parte del significado en el
+ * título, y una búsqueda que solo vectorizara el contenido nunca las encontraría
+ * — bug real encontrado al probar la búsqueda con notas de una sola frase. Como el
+ * título ya se muestra aparte en la cita/resultado, no hace falta duplicarlo en el
+ * extracto. */
 async function ingestNote(
-  noteId: string,
-  content: string,
+  note: Pick<Note, "id" | "title" | "content">,
   chunkRepository: ChunkRepository,
   embeddingProvider: EmbeddingProvider,
 ): Promise<void> {
-  const texts = chunkText(content);
-  const embeddings = await embeddingProvider.embed(texts);
+  const texts = chunkText(note.content);
+  const embeddings = await embeddingProvider.embed(texts.map((text) => `${note.title}\n\n${text}`));
   await chunkRepository.replaceForNote(
-    noteId,
+    note.id,
     texts.map((text, i) => ({ content: text, position: i, embedding: embeddings[i] })),
   );
 }
@@ -36,7 +43,7 @@ export function createNoteUseCases(
     create: async (input: NewNote): Promise<Note> => {
       validate(input);
       const note = await noteRepository.create(input);
-      await ingestNote(note.id, note.content, chunkRepository, embeddingProvider);
+      await ingestNote(note, chunkRepository, embeddingProvider);
       return note;
     },
 
@@ -44,7 +51,7 @@ export function createNoteUseCases(
       validate(input);
       const note = await noteRepository.update(id, input);
       if (!note) return null;
-      await ingestNote(note.id, note.content, chunkRepository, embeddingProvider);
+      await ingestNote(note, chunkRepository, embeddingProvider);
       return note;
     },
 

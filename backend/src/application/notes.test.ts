@@ -27,12 +27,18 @@ function fakeNoteRepository(): NoteRepository {
   };
 }
 
-function fakeChunkRepository(): ChunkRepository & { calls: { noteId: string; count: number }[] } {
+function fakeChunkRepository(): ChunkRepository & {
+  calls: { noteId: string; count: number }[];
+  storedChunks: { content: string; position: number }[];
+} {
   const calls: { noteId: string; count: number }[] = [];
+  const storedChunks: { content: string; position: number }[] = [];
   return {
     calls,
+    storedChunks,
     replaceForNote: async (noteId, chunks) => {
       calls.push({ noteId, count: chunks.length });
+      storedChunks.push(...chunks.map((c) => ({ content: c.content, position: c.position })));
     },
     removeForNote: async () => {},
     searchSimilar: async () => [],
@@ -53,6 +59,18 @@ describe("createNoteUseCases", () => {
 
     expect(note.title).toBe("Primera nota");
     expect(chunkRepository.calls).toEqual([{ noteId: note.id, count: 1 }]);
+  });
+
+  it("el título entra en el embedding (para que se encuentre al buscar) pero no se guarda en el extracto mostrado", async () => {
+    const noteRepository = fakeNoteRepository();
+    const chunkRepository = fakeChunkRepository();
+    const embedSpy = vi.fn(async (texts: string[]) => texts.map(() => [0, 0, 0]));
+    const useCases = createNoteUseCases(noteRepository, chunkRepository, { embed: embedSpy });
+
+    await useCases.create({ title: "Comida que le gusta a Flor", content: "Le gusta el McDonald's" });
+
+    expect(embedSpy).toHaveBeenCalledWith(["Comida que le gusta a Flor\n\nLe gusta el McDonald's"]);
+    expect(chunkRepository.storedChunks).toEqual([{ content: "Le gusta el McDonald's", position: 0 }]);
   });
 
   it("rechaza una nota con título vacío sin llegar a vectorizar nada", async () => {
