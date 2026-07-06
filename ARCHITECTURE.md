@@ -18,8 +18,7 @@ Frontend (React + TS)  ──HTTP/JSON──▶  Backend (Fastify + TS)  ──S
 | Frontend | React 19 + TypeScript + Vite | Rápido de iterar, tipado de extremo a extremo |
 | Backend | Node + TypeScript + Fastify | Overhead mínimo, tipado compartido con el frontend a nivel de contrato |
 | Base de datos | PostgreSQL + `pgvector` en Docker (local) | Búsqueda por similitud sin un servicio de BD vectorial aparte — despliegue tan ligero como un Postgres normal |
-| Embeddings | Voyage AI (`voyage-3`, 1024 dim) | Recomendado por Anthropic como pareja de Claude (que no ofrece embeddings propios) |
-| LLM | Claude (Anthropic) | Llamada HTTP directa, sin SDK — una sola llamada no justifica la dependencia extra |
+| Embeddings/LLM | Ollama local (`mxbai-embed-large` 1024 dim + `qwen2.5:7b-instruct`) por defecto; Voyage AI + Claude opcionales | Uso personal sobre notas privadas: sin coste por pregunta y sin que el contenido salga del Mac. Voyage/Claude quedan como adaptador alternativo de mejor calidad si algún día se quiere pagar por ello |
 | Sin ORM | Repositorios con `pg` + SQL explícito | Mismo criterio que en proyectos anteriores: el volumen de queries es pequeño y controlado |
 
 ## Arquitectura hexagonal (backend)
@@ -30,15 +29,17 @@ backend/src/
   application/       casos de uso: notes (CRUD + vectorizar), ask (RAG con citas), search (búsqueda semántica directa)
   infrastructure/
     db/             pool de conexión, migraciones, repositorios Postgres/pgvector
-    llm/            adaptadores: FakeProvider (tests), VoyageEmbeddingProvider, AnthropicLLMProvider
+    llm/            adaptadores: FakeProvider (tests), OllamaProvider (local, por defecto), VoyageEmbeddingProvider + AnthropicLLMProvider (opcionales, de pago)
     http/           servidor Fastify, rutas HTTP
 ```
 
-**El proveedor de IA es un puerto, no un detalle de infraestructura fijo.** `EmbeddingProvider` y `LLMProvider` son dos puertos independientes (Anthropic no ofrece embeddings, así que la pareja real es Voyage AI + Claude) — el dominio y los casos de uso no saben ni les importa si detrás hay una API de pago, un modelo local (Ollama, roadmap) o el `FakeProvider` determinista que usan los tests. Sin ninguna clave de API configurada, la app arranca igual con `FakeProvider`: se puede clonar y probar sin pagar ni configurar nada.
+**El proveedor de IA es un puerto, no un detalle de infraestructura fijo.** `EmbeddingProvider` y `LLMProvider` son dos puertos independientes (Anthropic no ofrece embeddings, así que la pareja de pago sería Voyage AI + Claude) — el dominio y los casos de uso no saben ni les importa si detrás hay un modelo local (Ollama), una API de pago o el `FakeProvider` determinista que usan los tests. Orden de prioridad en `index.ts`: claves de pago (`ANTHROPIC_API_KEY`/`VOYAGE_API_KEY`) > Ollama local (`OLLAMA_BASE_URL`) > `FakeProvider` (nada configurado).
+
+**Por qué Ollama y no una API de pago, para este proyecto en concreto**: RAG sobre notas *privadas* de una sola persona no tiene la misma justificación de coste que en una empresa (donde el gasto en IA se compensa con ahorro/ingreso) — pagar por token para buscar en las propias notas no compensaba. Un modelo local en el Mac mini (M4, 16GB) da respuestas reales y con comprensión semántica de verdad, sin factura ni clave de API, y refuerza la propuesta de valor central del proyecto (dueño de tus datos: ni siquiera el proveedor de IA los ve).
 
 ## Decisiones de testing
 
 - **Tests de dominio** (`chunkText`, casos de uso): con fakes en memoria, sin BD ni red.
 - **Tests de integración** (repositorios, servidor HTTP): contra una Postgres de test real (con `pgvector`), nunca la base real — mismo guard que otros proyectos (`TEST_DATABASE_URL` no puede coincidir con `DATABASE_URL`, falla fuerte si no).
 - **Bug real encontrado y arreglado durante el desarrollo**: vitest ejecuta ficheros de test en paralelo por defecto; como varios ficheros comparten la misma Postgres de test con un `truncate` global entre tests, un fichero podía vaciar las tablas mientras otro las estaba usando — condición de carrera reproducida y arreglada con `fileParallelism: false` en `backend/vitest.config.ts`.
-- **CI nunca llama a una API de pago**: los tests usan siempre `FakeEmbeddingProvider`/`FakeLLMProvider` (un "hashing trick" de bolsa de palabras normalizado, determinista pero con similitud coseno real basada en solapamiento de palabras — suficiente para verificar ranking sin depender de Voyage/Claude).
+- **Los tests nunca llaman a un proveedor de IA real** (ni de pago ni Ollama): usan siempre `FakeEmbeddingProvider`/`FakeLLMProvider` (un "hashing trick" de bolsa de palabras normalizado con stopwords del español y sin acentos, determinista pero con similitud coseno real basada en solapamiento de palabras — suficiente para verificar ranking sin depender de un proveedor real). `playwright.config.ts` fuerza explícitamente `ANTHROPIC_API_KEY`/`VOYAGE_API_KEY`/`OLLAMA_BASE_URL` a vacío en el `webServer` del backend: `dotenv` no pisa variables ya presentes en `process.env`, así que sin este override el E2E local heredaría la config de `backend/.env` del desarrollador (Ollama, si está activado) y dejaría de ser rápido/determinista.

@@ -20,7 +20,7 @@ Datos ficticios de ejemplo.
 
 ## Por qué
 
-Las alternativas cloud (Notion AI, Mem, Tana) no te dejan ser dueño de tus datos; las autoalojadas open-source (Khoj, Onyx, Quivr) están pensadas para equipos, con arquitecturas pesadas para un uso genuinamente personal. Nous es ligero (Postgres + `pgvector`, sin servicio de BD vectorial aparte), autoalojado, y con el proveedor de IA (embeddings + LLM) intercambiable por diseño — funciona sin ninguna clave de API configurada (respuestas simuladas) y con Claude + Voyage AI en cuanto añades las tuyas.
+Las alternativas cloud (Notion AI, Mem, Tana) no te dejan ser dueño de tus datos; las autoalojadas open-source (Khoj, Onyx, Quivr) están pensadas para equipos, con arquitecturas pesadas para un uso genuinamente personal. Nous es ligero (Postgres + `pgvector`, sin servicio de BD vectorial aparte), autoalojado, y con el proveedor de IA (embeddings + LLM) intercambiable por diseño — por defecto corre en local con **Ollama** (gratis, tus notas nunca salen del Mac), con Claude + Voyage AI como alternativa opcional de pago si algún día quieres mejor calidad.
 
 ## Configuración inicial
 
@@ -32,17 +32,26 @@ cp .env.example .env
 cp backend/.env.example backend/.env
 # Edita ambos .env y pon tu propia contraseña de Postgres (debe
 # coincidir en los dos archivos, tanto en POSTGRES_PASSWORD como
-# dentro de DATABASE_URL). ANTHROPIC_API_KEY/VOYAGE_API_KEY son
-# opcionales: sin ellas la app funciona igual, con respuestas simuladas.
+# dentro de DATABASE_URL).
 
-# 2. Base de datos
+# 2. IA local con Ollama (recomendado, gratis y privado)
+brew install ollama
+brew services start ollama
+ollama pull mxbai-embed-large
+ollama pull qwen2.5:7b-instruct
+# Descomenta OLLAMA_BASE_URL en backend/.env
+# (alternativa: ANTHROPIC_API_KEY/VOYAGE_API_KEY, de pago, mejor calidad)
+
+# 3. Base de datos
 docker compose up -d
 cd backend && npm install && npm run migrate:up && cd ..
 
-# 3. Backend y frontend
+# 4. Backend y frontend
 cd backend && npm run dev   # otra terminal
 npm install && npm run dev  # raíz del proyecto
 ```
+
+Sin ningún proveedor configurado (ni Ollama ni claves), la app arranca igual con respuestas simuladas — útil para probar la interfaz sin instalar nada.
 
 ## Tests
 

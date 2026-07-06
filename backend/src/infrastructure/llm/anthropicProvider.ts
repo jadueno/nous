@@ -1,17 +1,6 @@
 import type { LLMProvider } from "../../domain/ports.js";
 import type { RetrievedChunk } from "../../domain/types.js";
-
-function buildPrompt(question: string, context: RetrievedChunk[]): string {
-  const sources = context
-    .map((c, i) => `[${i + 1}] (${c.noteTitle})\n${c.chunk.content}`)
-    .join("\n\n");
-  return `Responde a la pregunta usando SOLO la información de las fuentes de abajo. Si no está, di que no lo sabes.
-
-Fuentes:
-${sources}
-
-Pregunta: ${question}`;
-}
+import { buildRagPrompt } from "./prompt.js";
 
 /** Adaptador real del LLM: Claude (Anthropic). Sin SDK a propósito — una sola llamada
  * HTTP no justifica la dependencia extra, igual que el resto del proyecto evita capas
@@ -29,7 +18,7 @@ export function createAnthropicLLMProvider(apiKey: string): LLMProvider {
         body: JSON.stringify({
           model: "claude-sonnet-5",
           max_tokens: 1024,
-          messages: [{ role: "user", content: buildPrompt(question, context) }],
+          messages: [{ role: "user", content: buildRagPrompt(question, context) }],
         }),
       });
       if (!res.ok) {

@@ -23,7 +23,17 @@ export default defineConfig({
       cwd: "backend",
       port: BACKEND_PORT,
       reuseExistingServer: !process.env.CI,
-      env: { PORT: String(BACKEND_PORT), DATABASE_URL: process.env.TEST_DATABASE_URL ?? "" },
+      env: {
+        PORT: String(BACKEND_PORT),
+        DATABASE_URL: process.env.TEST_DATABASE_URL ?? "",
+        // Forzar FakeProvider siempre en E2E, pase lo que pase en backend/.env local
+        // (dotenv no pisa variables ya presentes en process.env, así que esto gana):
+        // sin esto, tener Ollama configurado en local hace el E2E lento y no
+        // determinista, y en CI no hay Ollama instalado en absoluto.
+        ANTHROPIC_API_KEY: "",
+        VOYAGE_API_KEY: "",
+        OLLAMA_BASE_URL: "",
+      },
     },
     {
       command: `npx vite --port ${FRONTEND_PORT}`,
