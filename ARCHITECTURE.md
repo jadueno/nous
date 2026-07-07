@@ -45,6 +45,19 @@ backend/src/
 
 **PWA sin service worker**: `manifest.webmanifest` + iconos (192/512 PNG + variante maskable) + `apple-touch-icon`/meta `apple-mobile-web-app-*` bastan para "añadir a pantalla de inicio" en Android/iOS y abrir como app (sin la barra de Safari/Chrome). Sin service worker ni soporte offline a propósito: la app necesita el backend en vivo de todas formas (notas y chat viven en Postgres), así que la complejidad de cachear assets no compensa cuando de todos modos no funciona sin conexión al backend.
 
+## Identidad visual
+
+Nous comparte base técnica (arquitectura hexagonal, guía de desarrollo) y hasta los mismos ficheros de componente (`Button.tsx`, `Card.tsx`, `Field.tsx`...) con otro proyecto de portfolio, [Rumbo](https://github.com/jadueno/rumbo) — pero visualmente son deliberadamente opuestos, para que cada pieza del portfolio se reconozca por sí sola:
+
+| | Nous | Rumbo |
+|---|---|---|
+| Tema | Claro, cálido, tipo papel (`--page:#f4ecda`) | Oscuro azulado (`--page:#0a0b12`) |
+| Tipografía | Fraunces (serif con carácter, titulares) + Work Sans (cuerpo) | Inter |
+| Acentos | Arcilla + musgo (terrosos) | Índigo + amarillo (fríos/vivos) |
+| Forma | `rounded-xl` tipo ficha, marca cuadrada con "gotas de tinta" | Píldora, marca circular |
+
+La dirección "papel/cuaderno" para Nous no es solo estética: comunica mejor "notas personales privadas" que un panel de control oscuro tipo SaaS — coherente con el resto del posicionamiento (self-hosted, IA local, dueño de tus datos). Referencias de la categoría (Bear, Craft, Obsidian) se miraron para el lenguaje visual, no para copiarlas: de Bear viene la idea de tema claro cálido con tipografía de carácter; de Craft, tarjetas suaves tipo documento con radios moderados; de Obsidian, el posicionamiento de "segundo cerebro" local sin nube (sin tomar su paleta morada).
+
 ## Decisiones de testing
 
 - **Tests de dominio** (`chunkText`, casos de uso): con fakes en memoria, sin BD ni red.

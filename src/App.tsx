@@ -17,7 +17,7 @@ export default function App() {
 
   return (
     <ConfirmProvider>
-      <div className="flex min-h-screen flex-col sm:flex-row">
+      <div className="paper-shell flex min-h-screen flex-col sm:flex-row">
         {/* Sidebar de escritorio */}
         <nav
           aria-label="Secciones de la app"
@@ -25,7 +25,7 @@ export default function App() {
         >
           <div className="mb-4 flex items-center gap-2.5 px-2">
             <BrandMark />
-            <p className="text-sm leading-tight font-bold text-[var(--text-primary)]">Nous</p>
+            <p className="font-display text-lg leading-tight font-semibold text-[var(--text-primary)]">Nous</p>
           </div>
           {sections.map((s) => (
             <button
@@ -33,7 +33,7 @@ export default function App() {
               type="button"
               onClick={() => setSection(s.id)}
               aria-current={section === s.id ? "page" : undefined}
-              className={`flex items-center gap-2.5 rounded-full px-4 py-2.5 text-left text-sm font-semibold whitespace-nowrap transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-indigo)] ${
+              className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-left text-sm font-semibold whitespace-nowrap transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-clay)] ${
                 section === s.id
                   ? "bg-[var(--ink)] text-[var(--on-ink)]"
                   : "text-[var(--text-secondary)] hover:bg-[var(--gridline)]"
@@ -57,14 +57,14 @@ export default function App() {
           aria-label="Secciones de la app"
           className="fixed inset-x-0 bottom-0 z-10 pb-[env(safe-area-inset-bottom)] sm:hidden"
         >
-          <div className="mx-2 mb-3 flex justify-around rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-1)]/90 px-0.5 py-1.5 shadow-float backdrop-blur-md">
+          <div className="mx-2 mb-3 flex justify-around rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-1)]/90 px-0.5 py-1.5 shadow-float backdrop-blur-md">
             {sections.map((s) => (
               <button
                 key={s.id}
                 type="button"
                 onClick={() => setSection(s.id)}
                 aria-current={section === s.id ? "page" : undefined}
-                className={`flex flex-1 flex-col items-center gap-0.5 rounded-full px-0.5 py-1.5 text-[10px] font-semibold whitespace-nowrap transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-indigo)] ${
+                className={`flex flex-1 flex-col items-center gap-0.5 rounded-xl px-0.5 py-1.5 text-[10px] font-semibold whitespace-nowrap transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-clay)] ${
                   section === s.id ? "bg-[var(--ink)] text-[var(--on-ink)]" : "text-[var(--text-muted)]"
                 }`}
               >

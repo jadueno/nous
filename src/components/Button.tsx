@@ -3,10 +3,10 @@ import { focusRing } from "./Field";
 
 /**
  * Solo tres tonos de marca, deliberadamente pocos: "ink" es la acción principal por
- * defecto de cualquier pantalla o formulario; "indigo" se reserva para la acción que
+ * defecto de cualquier pantalla o formulario; "clay" se reserva para la acción que
  * dispara una respuesta generada por IA (Chat); "critical" para confirmar un borrado.
  */
-export type ButtonTone = "ink" | "indigo" | "critical";
+export type ButtonTone = "ink" | "clay" | "critical";
 
 /**
  * "solid": botón principal, píldora rellena.
@@ -26,20 +26,22 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const toneVars: Record<ButtonTone, { bg: string; fg: string }> = {
   ink: { bg: "var(--ink)", fg: "var(--on-ink)" },
-  indigo: { bg: "var(--accent-indigo)", fg: "var(--on-accent-indigo)" },
+  clay: { bg: "var(--accent-clay)", fg: "var(--on-accent-clay)" },
   critical: { bg: "var(--status-critical)", fg: "var(--on-status-critical)" },
 };
 
 /**
- * Botón compartido por toda la app: misma forma de píldora, radios y transiciones en
- * cualquier pantalla o formulario. No lleva lógica de negocio, solo presentación.
+ * Botón compartido por toda la app: misma forma "de ficha" (esquinas redondeadas, no
+ * píldora — a propósito, para no repetir el lenguaje de Rumbo), mismos radios y
+ * transiciones en cualquier pantalla o formulario. No lleva lógica de negocio, solo
+ * presentación.
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { tone = "ink", variant = "solid", size = "md", className = "", style, disabled, children, type = "button", ...rest },
   ref,
 ) {
   const sizeClass = size === "sm" ? "px-3.5 py-1.5 text-sm" : "px-4 py-2.5 text-sm";
-  const base = `inline-flex items-center justify-center gap-1.5 rounded-full font-semibold whitespace-nowrap transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
+  const base = `inline-flex items-center justify-center gap-1.5 rounded-xl font-semibold whitespace-nowrap transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
 
   if (variant === "ghost") {
     return (

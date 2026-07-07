@@ -1,43 +1,52 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  /* Work Sans para la interfaz (cuerpo, controles): humanista y cálida, distinta de
+     Inter (que usa Rumbo) a propósito. Fraunces para titulares/marca: serif con
+     personalidad, evoca cuaderno/manuscrito frente al "SaaS grotesque" de Rumbo. */
+  --font-sans: "Work Sans", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
 }
 
 :root {
-  /* Tema oscuro fijo (no depende de prefers-color-scheme), identidad propia (no la de Rumbo). */
-  --page: #0a0e14;
-  --surface-1: #12171f;
-  --surface-2: #1a212c;
-  --text-primary: #f2f4f8;
-  --text-secondary: #c3cad6;
-  --text-muted: #8792a3;
-  --gridline: #232b38;
-  --border: rgba(255, 255, 255, 0.1);
+  /* Tema claro fijo tipo "papel" (no depende de prefers-color-scheme): identidad propia,
+     deliberadamente opuesta al tema oscuro azulado de Rumbo. Nous es un cuaderno
+     personal privado, no un panel de control — el papel cálido comunica eso mejor que
+     un dashboard oscuro. */
+  --page: #f4ecda;
+  --surface-1: #fbf7ec;
+  --surface-2: #ece0c4;
+  --text-primary: #2a2118;
+  --text-secondary: #5b4c3b;
+  --text-muted: #786952;
+  --gridline: #e3d5b0;
+  --border: rgba(58, 45, 26, 0.16);
 
-  /* Acentos de marca: índigo (IA/intelecto) + teal (fuente verificada/citada) sobre
-     una base neutra blanco/negro (--ink/--page), mismo lenguaje que Rumbo pero paleta
-     propia — dos únicos acentos "vivos", el resto de la interfaz es neutra. */
+  /* Acentos de marca: arcilla (tinta/acción principal de IA) + musgo (etiquetas,
+     segundo acento de marca) sobre una base neutra tinta/papel (--ink/--page) — dos
+     únicos acentos "vivos", el resto de la interfaz es neutro. Paleta cálida terrosa,
+     sin relación con el índigo/teal frío de Rumbo. */
   --ink: var(--text-primary);
-  --on-ink: var(--page);
-  --accent-indigo: #818cf8;
-  --on-accent-indigo: #10121f;
-  --accent-teal: #2dd4bf;
-  --on-accent-teal: #08201c;
+  --on-ink: #f7f1e2;
+  --accent-clay: #a3461f;
+  --on-accent-clay: #faf6ea;
+  --accent-moss: #355c46;
+  --on-accent-moss: #faf6ea;
 
-  --status-good: #22c55e;
-  --status-warning: #eab308;
-  --status-serious: #f97316;
-  --status-critical: #ef4444;
-  --on-status-good: #08200e;
-  --on-status-warning: #201a08;
+  --status-good: #256b3f;
+  --status-warning: #8a5a05;
+  --status-serious: #b1541f;
+  --status-critical: #a3291f;
+  --on-status-good: #faf6ea;
+  --on-status-warning: #faf6ea;
   --on-status-critical: #ffffff;
 
-  --shadow-tint: 0, 0, 0;
+  /* Tinte cálido (no neutro) para sombras: papel, no cristal. */
+  --shadow-tint: 58, 45, 26;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
   overflow-x: hidden;
 }
 
@@ -52,18 +61,37 @@ body {
   font-feature-settings: "tnum" 1;
 }
 
+/* Textura de papel muy sutil (grano), fija detrás del contenido — el equivalente de
+   Nous al resplandor de color de Rumbo, pero táctil/neutro en vez de "glow" de marca:
+   ruido SVG inline, sin petición de red ni dependencia. */
+.paper-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.paper-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.16  0 0 0 0 0.13  0 0 0 0 0.09  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
 @utility shadow-card {
-  box-shadow: 0 1px 2px rgba(var(--shadow-tint), 0.05);
+  box-shadow: 0 1px 2px rgba(var(--shadow-tint), 0.08);
 }
 
 @utility shadow-card-hover {
-  box-shadow: 0 4px 12px -4px rgba(var(--shadow-tint), 0.14);
+  box-shadow: 0 4px 12px -4px rgba(var(--shadow-tint), 0.18);
 }
 
 @utility shadow-float {
   box-shadow:
-    0 2px 8px rgba(var(--shadow-tint), 0.08),
-    0 12px 28px -10px rgba(var(--shadow-tint), 0.2);
+    0 2px 8px rgba(var(--shadow-tint), 0.1),
+    0 12px 28px -10px rgba(var(--shadow-tint), 0.22);
 }
 
 @keyframes shimmer {

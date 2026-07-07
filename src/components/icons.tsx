@@ -2,11 +2,13 @@ import type { SVGProps } from "react";
 
 type IconProps = SVGProps<SVGSVGElement>;
 
+// strokeWidth ligeramente más grueso que el habitual (1.8) a propósito: trazo con más
+// peso, más cercano a un plumín que a un icono de dashboard.
 const base = {
   viewBox: "0 0 24 24",
   fill: "none",
   stroke: "currentColor",
-  strokeWidth: 1.8,
+  strokeWidth: 2.1,
   strokeLinecap: "round" as const,
   strokeLinejoin: "round" as const,
   "aria-hidden": true,

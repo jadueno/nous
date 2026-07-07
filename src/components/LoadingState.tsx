@@ -24,7 +24,7 @@ export function ListSkeleton({
         <div
           key={i}
           aria-hidden="true"
-          className="flex flex-col gap-3 rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-1)] p-5 shadow-card sm:p-6"
+          className="flex flex-col gap-3 rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-1)] p-5 shadow-card sm:p-6"
         >
           <SkeletonBlock className="h-4 w-2/3" />
           <SkeletonBlock className="h-3 w-1/3" />

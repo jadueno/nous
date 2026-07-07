@@ -78,7 +78,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="confirm-dialog-message"
-            className="w-full max-w-sm rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-1)] p-6 shadow-float"
+            className="w-full max-w-sm rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-1)] p-6 shadow-float"
             onKeyDown={handleKeyDown}
           >
             <p id="confirm-dialog-message" className="text-sm text-[var(--text-primary)]">

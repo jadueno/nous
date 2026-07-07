@@ -29,7 +29,9 @@ export function ChatScreen() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">Chat</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-4xl">
+            Chat
+          </h1>
           <p className="text-sm text-[var(--text-secondary)]">Pregúntale a tus notas, en lenguaje natural.</p>
         </div>
         {messages.length > 0 && (
@@ -51,7 +53,7 @@ export function ChatScreen() {
               />
             </Field>
           </div>
-          <Button type="submit" tone="indigo" disabled={sending || !question.trim()}>
+          <Button type="submit" tone="clay" disabled={sending || !question.trim()}>
             {sending ? "Preguntando…" : "Preguntar"}
           </Button>
         </form>
@@ -85,7 +87,7 @@ export function ChatScreen() {
             m.role === "user" ? (
               <div
                 key={m.id}
-                className="ml-auto max-w-[85%] rounded-2xl bg-[var(--ink)] px-4 py-2.5 text-[15px] whitespace-pre-wrap text-[var(--on-ink)]"
+                className="ml-auto max-w-[85%] rounded-xl bg-[var(--ink)] px-4 py-2.5 text-[15px] whitespace-pre-wrap text-[var(--on-ink)]"
               >
                 {m.content}
               </div>
@@ -94,11 +96,11 @@ export function ChatScreen() {
                 key={m.id}
                 className="mr-auto max-w-[85%]"
                 style={{
-                  borderColor: "var(--accent-indigo)",
-                  backgroundColor: "color-mix(in srgb, var(--accent-indigo) 6%, var(--surface-1))",
+                  borderColor: "var(--accent-clay)",
+                  backgroundColor: "color-mix(in srgb, var(--accent-clay) 6%, var(--surface-1))",
                 }}
               >
-                <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: "var(--accent-indigo)" }}>
+                <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: "var(--accent-clay)" }}>
                   <SparkleIcon className="size-4" />
                   Nous
                 </div>
@@ -109,9 +111,9 @@ export function ChatScreen() {
                 ) : (
                   // Mensaje en borrador (streaming): todavía no ha llegado ningún trozo.
                   <span role="status" aria-label="Pensando…" className="mt-2 flex gap-1">
-                    <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-indigo)] [animation-delay:-0.3s]" />
-                    <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-indigo)] [animation-delay:-0.15s]" />
-                    <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-indigo)]" />
+                    <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-clay)] [animation-delay:-0.3s]" />
+                    <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-clay)] [animation-delay:-0.15s]" />
+                    <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-clay)]" />
                   </span>
                 )}
               </Card>

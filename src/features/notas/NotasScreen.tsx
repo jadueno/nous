@@ -46,7 +46,9 @@ export function NotasScreen() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">Notas</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-4xl">
+            Notas
+          </h1>
           <p className="text-sm text-[var(--text-secondary)]">
             {notes.length === 0
               ? "Tu segundo cerebro, todavía vacío."
@@ -68,11 +70,17 @@ export function NotasScreen() {
                 type="button"
                 onClick={() => setActiveTag(isActive ? null : tag)}
                 aria-pressed={isActive}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${focusRing} ${
-                  isActive
-                    ? "bg-[var(--ink)] text-[var(--on-ink)]"
-                    : "bg-[var(--surface-1)] text-[var(--text-secondary)] hover:bg-[var(--gridline)]"
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all ${focusRing} ${
+                  isActive ? "bg-[var(--ink)] text-[var(--on-ink)]" : "hover:brightness-95"
                 }`}
+                style={
+                  isActive
+                    ? undefined
+                    : {
+                        backgroundColor: "color-mix(in srgb, var(--accent-moss) 12%, var(--surface-1))",
+                        color: "var(--accent-moss)",
+                      }
+                }
               >
                 {tag}
               </button>
@@ -138,7 +146,7 @@ export function NotasScreen() {
                 onClick={() => setEditing(note)}
                 className={`flex flex-col gap-1.5 rounded-xl pr-16 text-left ${focusRing}`}
               >
-                <h2 className="font-semibold text-[var(--text-primary)]">{note.title}</h2>
+                <h2 className="font-display text-lg font-semibold text-[var(--text-primary)]">{note.title}</h2>
                 <p className="text-xs text-[var(--text-muted)]">Actualizada {formatUpdated(note.updatedAt)}</p>
                 <p className="text-sm text-[var(--text-secondary)]">{preview(note.content)}</p>
               </button>
@@ -147,7 +155,11 @@ export function NotasScreen() {
                   {note.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full bg-[var(--gridline)] px-2 py-0.5 text-[11px] font-medium text-[var(--text-secondary)]"
+                      className="rounded-full px-2 py-0.5 text-[11px] font-medium"
+                      style={{
+                        backgroundColor: "color-mix(in srgb, var(--accent-moss) 14%, var(--surface-1))",
+                        color: "var(--accent-moss)",
+                      }}
                     >
                       {tag}
                     </span>

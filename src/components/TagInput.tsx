@@ -43,18 +43,22 @@ export function TagInput({
       <label htmlFor={inputId} className="font-medium text-[var(--text-secondary)]">
         {label}
       </label>
-      <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-[var(--border)] bg-[var(--surface-1)] px-3 py-2 transition-colors focus-within:border-[var(--accent-indigo)]">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-1)] px-3 py-2 transition-colors focus-within:border-[var(--accent-clay)]">
         {tags.map((tag) => (
           <span
             key={tag}
-            className="flex items-center gap-1 rounded-full bg-[var(--gridline)] px-2.5 py-1 text-xs font-medium whitespace-nowrap text-[var(--text-secondary)]"
+            className="flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--accent-moss) 14%, var(--surface-1))",
+              color: "var(--accent-moss)",
+            }}
           >
             {tag}
             <button
               type="button"
               onClick={() => onChange(tags.filter((t) => t !== tag))}
               aria-label={`Quitar etiqueta ${tag}`}
-              className="text-[var(--text-muted)] transition-colors hover:text-[var(--status-critical)]"
+              className="transition-colors hover:text-[var(--status-critical)]"
             >
               ×
             </button>
