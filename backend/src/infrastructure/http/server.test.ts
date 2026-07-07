@@ -5,6 +5,20 @@ import { createTestPool, resetDatabase } from "../../test/testPool.js";
 import { createFakeEmbeddingProvider, createFakeLLMProvider } from "../llm/fakeProvider.js";
 import { buildServer } from "./server.js";
 
+/** POST /messages responde en SSE (streaming), no un único JSON — se parsean los
+ * bloques `event: ...\ndata: ...` para poder inspeccionar el evento final ("done"). */
+function parseSSE(payload: string): { event: string; data: unknown }[] {
+  return payload
+    .split("\n\n")
+    .filter((frame) => frame.trim())
+    .map((frame) => {
+      const lines = frame.split("\n");
+      const event = lines.find((l) => l.startsWith("event: "))!.slice("event: ".length);
+      const data = lines.find((l) => l.startsWith("data: "))!.slice("data: ".length);
+      return { event, data: JSON.parse(data) };
+    });
+}
+
 let pool: Pool;
 let app: FastifyInstance;
 
@@ -86,7 +100,7 @@ describe("etiquetas", () => {
 });
 
 describe("chat (POST/GET/DELETE /messages)", () => {
-  it("responde citando la nota de origen, y persiste pregunta y respuesta", async () => {
+  it("responde en streaming (SSE), citando la nota de origen, y persiste pregunta y respuesta", async () => {
     await app.inject({
       method: "POST",
       url: "/notes",
@@ -100,9 +114,16 @@ describe("chat (POST/GET/DELETE /messages)", () => {
     });
 
     expect(res.statusCode).toBe(200);
-    const body = res.json();
-    expect(body.citations).toEqual([expect.objectContaining({ noteTitle: "Receta de pan" })]);
-    expect(body.message).toMatchObject({ role: "assistant" });
+    expect(res.headers["content-type"]).toBe("text/event-stream");
+    const events = parseSSE(res.payload);
+    expect(events.some((e) => e.event === "token")).toBe(true);
+
+    const done = events.find((e) => e.event === "done")!.data as {
+      message: { role: string; content: string };
+      citations: { noteTitle: string }[];
+    };
+    expect(done.citations).toEqual([expect.objectContaining({ noteTitle: "Receta de pan" })]);
+    expect(done.message).toMatchObject({ role: "assistant" });
 
     const messages = await app.inject({ method: "GET", url: "/messages" });
     expect(messages.json()).toMatchObject([
@@ -114,7 +135,13 @@ describe("chat (POST/GET/DELETE /messages)", () => {
   it("sin notas guardadas, no falla y devuelve cero citas", async () => {
     const res = await app.inject({ method: "POST", url: "/messages", payload: { question: "¿Algo?" } });
     expect(res.statusCode).toBe(200);
-    expect(res.json().citations).toEqual([]);
+    const done = parseSSE(res.payload).find((e) => e.event === "done")!.data as { citations: unknown[] };
+    expect(done.citations).toEqual([]);
+  });
+
+  it("rechaza una pregunta vacía con un 400 normal (sin llegar a abrir el stream)", async () => {
+    const res = await app.inject({ method: "POST", url: "/messages", payload: { question: "   " } });
+    expect(res.statusCode).toBe(400);
   });
 
   it("DELETE /messages vacía la conversación", async () => {

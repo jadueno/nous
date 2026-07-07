@@ -62,9 +62,34 @@ describe("ChatScreen", () => {
     await user.type(screen.getByLabelText("Tu pregunta"), "¿Qué hace falta para el pan?");
     await user.click(screen.getByRole("button", { name: "Preguntar" }));
 
-    expect(chatApi.ask).toHaveBeenCalledWith("¿Qué hace falta para el pan?");
+    expect(chatApi.ask).toHaveBeenCalledWith("¿Qué hace falta para el pan?", expect.any(Function));
     expect(await screen.findByText("¿Qué hace falta para el pan?")).toBeInTheDocument();
     expect(await screen.findByText("Hace falta harina, agua, sal y levadura.")).toBeInTheDocument();
+  });
+
+  it("muestra el texto según van llegando los trozos (streaming), antes de recibir el mensaje final", async () => {
+    const user = userEvent.setup();
+    let resolveAsk!: (result: unknown) => void;
+    chatApi.ask.mockImplementation((_question: string, onToken: (chunk: string) => void) => {
+      onToken("Hace falta ");
+      onToken("harina.");
+      return new Promise((resolve) => {
+        resolveAsk = resolve;
+      });
+    });
+    renderScreen();
+    await screen.findByText(/Todavía no le has preguntado nada/);
+
+    await user.type(screen.getByLabelText("Tu pregunta"), "¿Qué hace falta para el pan?");
+    await user.click(screen.getByRole("button", { name: "Preguntar" }));
+
+    expect(await screen.findByText("Hace falta harina.")).toBeInTheDocument();
+
+    resolveAsk({
+      message: { id: "m2", role: "assistant", content: "Hace falta harina.", createdAt: "2026-01-01T00:00:01Z" },
+      citations: [],
+    });
+    await waitFor(() => expect(screen.getByText("Hace falta harina.")).toBeInTheDocument());
   });
 
   it("si la API falla, muestra el error en vez de quedarse cargando", async () => {

@@ -36,7 +36,11 @@ export function createChatUseCase(
 
     clearMessages: (): Promise<void> => chatRepository.clear(),
 
-    ask: async (question: string): Promise<AskResult> => {
+    // `onToken` recibe cada trozo de la respuesta según se genera (streaming real
+    // desde Ollama/Anthropic, ver LLMProvider). También se invoca para las respuestas
+    // "enlatadas" (sin notas / sin contexto relevante), como un único trozo — así el
+    // llamador no necesita distinguir ambos casos.
+    ask: async (question: string, onToken: (chunk: string) => void): Promise<AskResult> => {
       if (!question.trim()) throw new Error("La pregunta no puede estar vacía");
 
       const history = await chatRepository.list(HISTORY_LIMIT);
@@ -50,10 +54,12 @@ export function createChatUseCase(
       let citations: AskResult["citations"] = [];
       if (retrieved.length === 0) {
         text = "Todavía no tienes notas guardadas para responder a esto.";
+        onToken(text);
       } else if (context.length === 0) {
         text = "No he encontrado ninguna nota relevante para responder a esto.";
+        onToken(text);
       } else {
-        text = await llmProvider.answer(question, context, history);
+        text = await llmProvider.answer(question, context, history, onToken);
         citations = toCitations(context);
       }
 

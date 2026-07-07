@@ -7,6 +7,8 @@ const fakeEmbeddingProvider: EmbeddingProvider = {
   embed: async (texts) => texts.map(() => [1, 0, 0]),
 };
 
+const noop = () => {};
+
 function chunkRepositoryReturning(results: RetrievedChunk[]): ChunkRepository {
   return {
     replaceForNote: async () => {},
@@ -38,7 +40,7 @@ describe("createChatUseCase", () => {
     const llmProvider: LLMProvider = { answer: async () => ((llmCalled = true), "no debería llamarse") };
     const useCase = createChatUseCase(fakeChatRepository(), chunkRepository, fakeEmbeddingProvider, llmProvider);
 
-    const result = await useCase.ask("¿Qué apunté sobre X?");
+    const result = await useCase.ask("¿Qué apunté sobre X?", noop);
 
     expect(llmCalled).toBe(false);
     expect(result.citations).toEqual([]);
@@ -55,7 +57,7 @@ describe("createChatUseCase", () => {
     const llmProvider: LLMProvider = { answer: async () => "Respuesta generada" };
     const useCase = createChatUseCase(fakeChatRepository(), chunkRepository, fakeEmbeddingProvider, llmProvider);
 
-    const result = await useCase.ask("¿Qué apunté sobre X?");
+    const result = await useCase.ask("¿Qué apunté sobre X?", noop);
 
     expect(result.message.content).toBe("Respuesta generada");
     expect(result.citations).toEqual([
@@ -73,7 +75,7 @@ describe("createChatUseCase", () => {
     const llmProvider: LLMProvider = { answer: async () => ((llmCalled = true), "no debería llamarse") };
     const useCase = createChatUseCase(fakeChatRepository(), chunkRepository, fakeEmbeddingProvider, llmProvider);
 
-    const result = await useCase.ask("¿Algo totalmente distinto?");
+    const result = await useCase.ask("¿Algo totalmente distinto?", noop);
 
     expect(llmCalled).toBe(false);
     expect(result.citations).toEqual([]);
@@ -89,7 +91,7 @@ describe("createChatUseCase", () => {
     const llmProvider: LLMProvider = { answer: async () => "Respuesta generada" };
     const useCase = createChatUseCase(fakeChatRepository(), chunkRepository, fakeEmbeddingProvider, llmProvider);
 
-    const result = await useCase.ask("¿Qué apunté sobre X?");
+    const result = await useCase.ask("¿Qué apunté sobre X?", noop);
 
     expect(result.citations).toEqual([{ noteId: "n1", noteTitle: "Nota relevante", excerpt: "Relevante" }]);
   });
@@ -99,7 +101,7 @@ describe("createChatUseCase", () => {
     const llmProvider: LLMProvider = { answer: async () => "" };
     const useCase = createChatUseCase(fakeChatRepository(), chunkRepository, fakeEmbeddingProvider, llmProvider);
 
-    await expect(useCase.ask("   ")).rejects.toThrow("pregunta");
+    await expect(useCase.ask("   ", noop)).rejects.toThrow("pregunta");
   });
 
   it("persiste la pregunta y la respuesta como mensajes, recuperables con listMessages()", async () => {
@@ -109,7 +111,7 @@ describe("createChatUseCase", () => {
     const llmProvider: LLMProvider = { answer: async () => "Respuesta generada" };
     const useCase = createChatUseCase(fakeChatRepository(), chunkRepository, fakeEmbeddingProvider, llmProvider);
 
-    await useCase.ask("¿Qué apunté sobre X?");
+    await useCase.ask("¿Qué apunté sobre X?", noop);
     const messages = await useCase.listMessages();
 
     expect(messages).toHaveLength(2);
@@ -130,8 +132,8 @@ describe("createChatUseCase", () => {
     };
     const useCase = createChatUseCase(fakeChatRepository(), chunkRepository, fakeEmbeddingProvider, llmProvider);
 
-    await useCase.ask("Primera pregunta");
-    await useCase.ask("Segunda pregunta");
+    await useCase.ask("Primera pregunta", noop);
+    await useCase.ask("Segunda pregunta", noop);
 
     expect(receivedHistories[0]).toEqual([]);
     expect(receivedHistories[1].map((m) => m.content)).toEqual(["Primera pregunta", "Respuesta generada"]);
@@ -142,9 +144,40 @@ describe("createChatUseCase", () => {
     const llmProvider: LLMProvider = { answer: async () => "" };
     const useCase = createChatUseCase(fakeChatRepository(), chunkRepository, fakeEmbeddingProvider, llmProvider);
 
-    await useCase.ask("¿Algo?");
+    await useCase.ask("¿Algo?", noop);
     await useCase.clearMessages();
 
     expect(await useCase.listMessages()).toEqual([]);
+  });
+
+  it("emite cada trozo generado por el LLM vía onToken, y el mensaje final concatena el texto completo", async () => {
+    const chunkRepository = chunkRepositoryReturning([
+      { chunk: { id: "c1", noteId: "n1", content: "Relevante", position: 0 }, noteTitle: "Nota", score: 0.9 },
+    ]);
+    const llmProvider: LLMProvider = {
+      answer: async (_question, _context, _history, onToken) => {
+        onToken("Hola");
+        onToken(" mundo");
+        return "Hola mundo";
+      },
+    };
+    const useCase = createChatUseCase(fakeChatRepository(), chunkRepository, fakeEmbeddingProvider, llmProvider);
+    const chunks: string[] = [];
+
+    const result = await useCase.ask("¿Qué apunté sobre X?", (chunk) => chunks.push(chunk));
+
+    expect(chunks).toEqual(["Hola", " mundo"]);
+    expect(result.message.content).toBe("Hola mundo");
+  });
+
+  it("también emite por onToken las respuestas enlatadas (sin notas o sin contexto relevante)", async () => {
+    const chunkRepository = chunkRepositoryReturning([]);
+    const llmProvider: LLMProvider = { answer: async () => "no debería llamarse" };
+    const useCase = createChatUseCase(fakeChatRepository(), chunkRepository, fakeEmbeddingProvider, llmProvider);
+    const chunks: string[] = [];
+
+    const result = await useCase.ask("¿Algo?", (chunk) => chunks.push(chunk));
+
+    expect(chunks).toEqual([result.message.content]);
   });
 });

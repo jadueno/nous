@@ -30,15 +30,23 @@ export function useChat() {
   const ask = useCallback(async (question: string) => {
     setSending(true);
     setSendError(null);
+    // Mensaje del asistente "en borrador": arranca vacío y se rellena token a token
+    // (ver onToken abajo); al terminar se sustituye por el mensaje real ya persistido
+    // (con su id definitivo), para que quede igual que tras recargar la página.
+    const draftId = tempId();
     setMessages((prev) => [
       ...prev,
       { id: tempId(), role: "user", content: question, createdAt: new Date().toISOString() },
+      { id: draftId, role: "assistant", content: "", createdAt: new Date().toISOString() },
     ]);
     try {
-      const { message } = await chatApi.ask(question);
-      setMessages((prev) => [...prev, message]);
+      const { message } = await chatApi.ask(question, (chunk) => {
+        setMessages((prev) => prev.map((m) => (m.id === draftId ? { ...m, content: m.content + chunk } : m)));
+      });
+      setMessages((prev) => prev.map((m) => (m.id === draftId ? message : m)));
     } catch (err) {
       setSendError(err instanceof Error ? err.message : "No se ha podido obtener una respuesta");
+      setMessages((prev) => prev.filter((m) => m.id !== draftId));
     } finally {
       setSending(false);
     }

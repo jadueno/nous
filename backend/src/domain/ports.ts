@@ -46,8 +46,11 @@ export interface EmbeddingProvider {
 
 export interface LLMProvider {
   /** Genera una respuesta a partir de la pregunta, los trozos de contexto recuperados y los
-   * últimos turnos de la conversación (para preguntas de seguimiento tipo "¿y en qué cantidad?"). */
-  answer(question: string, context: RetrievedChunk[], history: ChatMessage[]): Promise<string>;
+   * últimos turnos de la conversación (para preguntas de seguimiento tipo "¿y en qué cantidad?").
+   * `onToken` se invoca con cada trozo de texto según va llegando (streaming real desde
+   * Ollama/Anthropic) — el resuelto final es siempre el texto completo, el mismo que se
+   * habría obtenido concatenando todos los trozos, para poder persistirlo tal cual. */
+  answer(question: string, context: RetrievedChunk[], history: ChatMessage[], onToken: (chunk: string) => void): Promise<string>;
 }
 
 const MAX_TITLE_LENGTH = 80;

@@ -1,6 +1,7 @@
 import type { EmbeddingProvider, LLMProvider } from "../../domain/ports.js";
 import type { ChatMessage, RetrievedChunk } from "../../domain/types.js";
 import { buildSystemPrompt } from "./prompt.js";
+import { readNdjsonLines } from "./streaming.js";
 
 /**
  * Adaptadores reales corriendo en local vía Ollama (http://localhost:11434 por
@@ -37,8 +38,15 @@ export function createOllamaLLMProvider(baseUrl: string, model = "qwen2.5:7b-ins
   return {
     // /api/chat (no /api/generate): soporta mensajes con rol de forma nativa, así el
     // historial de la conversación entra como turnos reales en vez de tener que
-    // aplanarlo a mano dentro de un único string de prompt.
-    answer: async (question: string, context: RetrievedChunk[], history: ChatMessage[]): Promise<string> => {
+    // aplanarlo a mano dentro de un único string de prompt. Con stream:true, Ollama
+    // devuelve NDJSON (una línea = un trozo) en vez de esperar a tener la respuesta
+    // entera — así el chat puede mostrar el texto según se genera.
+    answer: async (
+      question: string,
+      context: RetrievedChunk[],
+      history: ChatMessage[],
+      onToken: (chunk: string) => void,
+    ): Promise<string> => {
       const res = await fetch(`${baseUrl}/api/chat`, {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -49,14 +57,21 @@ export function createOllamaLLMProvider(baseUrl: string, model = "qwen2.5:7b-ins
             ...history.map((m) => ({ role: m.role, content: m.content })),
             { role: "user", content: question },
           ],
-          stream: false,
+          stream: true,
         }),
       });
       if (!res.ok) {
         throw new Error(`Ollama (generación) respondió ${res.status}: ${await res.text()}`);
       }
-      const body = (await res.json()) as { message: { content: string } };
-      return body.message.content;
+      let fullText = "";
+      await readNdjsonLines(res, (line) => {
+        const parsed = JSON.parse(line) as { message?: { content: string } };
+        if (parsed.message?.content) {
+          fullText += parsed.message.content;
+          onToken(parsed.message.content);
+        }
+      });
+      return fullText;
     },
   };
 }

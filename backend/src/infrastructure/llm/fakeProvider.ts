@@ -53,10 +53,14 @@ export function createFakeLLMProvider(): LLMProvider {
   return {
     // El historial no afecta a la respuesta simulada: los tests que necesitan
     // comprobar que el historial llega hasta aquí usan su propio LLMProvider de espía
-    // (ver application/chat.test.ts), no este fake.
-    answer: async (question: string, context: RetrievedChunk[]) => {
+    // (ver application/chat.test.ts), no este fake. Se emite palabra a palabra por
+    // onToken (en vez de una sola vez) para poder probar el streaming end-to-end sin
+    // depender de un proveedor real.
+    answer: async (question: string, context: RetrievedChunk[], _history, onToken) => {
       const titles = [...new Set(context.map((c) => c.noteTitle))].join(", ");
-      return `[respuesta simulada] Sobre "${question}", según tus notas (${titles}).`;
+      const text = `[respuesta simulada] Sobre "${question}", según tus notas (${titles}).`;
+      text.split(" ").forEach((word, i) => onToken(i === 0 ? word : ` ${word}`));
+      return text;
     },
   };
 }

@@ -102,27 +102,21 @@ export function ChatScreen() {
                   <SparkleIcon className="size-4" />
                   Nous
                 </div>
-                <p className="mt-2 text-[15px] leading-relaxed whitespace-pre-wrap text-[var(--text-primary)]">
-                  {m.content}
-                </p>
+                {m.content ? (
+                  <p className="mt-2 text-[15px] leading-relaxed whitespace-pre-wrap text-[var(--text-primary)]">
+                    {m.content}
+                  </p>
+                ) : (
+                  // Mensaje en borrador (streaming): todavía no ha llegado ningún trozo.
+                  <span role="status" aria-label="Pensando…" className="mt-2 flex gap-1">
+                    <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-indigo)] [animation-delay:-0.3s]" />
+                    <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-indigo)] [animation-delay:-0.15s]" />
+                    <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-indigo)]" />
+                  </span>
+                )}
               </Card>
             ),
           )}
-        </div>
-      )}
-
-      {sending && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex items-center gap-2 px-2 text-sm text-[var(--text-muted)]"
-        >
-          <span className="flex gap-1" aria-hidden="true">
-            <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-indigo)] [animation-delay:-0.3s]" />
-            <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-indigo)] [animation-delay:-0.15s]" />
-            <span className="size-1.5 animate-bounce rounded-full bg-[var(--accent-indigo)]" />
-          </span>
-          Pensando…
         </div>
       )}
 
