@@ -16,7 +16,16 @@ export interface Citation {
   excerpt: string;
 }
 
-export interface Answer {
-  text: string;
+/** Un turno de la conversación, persistido en el backend: una sola conversación
+ * continua (sin hilos separados), recuperable al recargar o cambiar de dispositivo. */
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+}
+
+export interface AskResult {
+  message: ChatMessage;
   citations: Citation[];
 }

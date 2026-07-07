@@ -4,13 +4,14 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import type { Pool } from "pg";
 import { createNoteUseCases } from "../../application/notes.js";
-import { createAskUseCase } from "../../application/ask.js";
+import { createChatUseCase } from "../../application/chat.js";
 import type { EmbeddingProvider, LLMProvider } from "../../domain/ports.js";
 import { registerAuth } from "./auth.js";
 import { registerNoteRoutes } from "./noteRoutes.js";
-import { registerAskRoutes } from "./askRoutes.js";
+import { registerChatRoutes } from "./chatRoutes.js";
 import { createNoteRepository } from "../db/repositories/noteRepository.js";
 import { createChunkRepository } from "../db/repositories/chunkRepository.js";
+import { createChatRepository } from "../db/repositories/chatRepository.js";
 
 export async function buildServer(
   pool: Pool,
@@ -34,9 +35,10 @@ export async function buildServer(
 
   const noteRepository = createNoteRepository(pool);
   const chunkRepository = createChunkRepository(pool);
+  const chatRepository = createChatRepository(pool);
 
   registerNoteRoutes(app, createNoteUseCases(noteRepository, chunkRepository, embeddingProvider));
-  registerAskRoutes(app, createAskUseCase(chunkRepository, embeddingProvider, llmProvider));
+  registerChatRoutes(app, createChatUseCase(chatRepository, chunkRepository, embeddingProvider, llmProvider));
 
   return app;
 }

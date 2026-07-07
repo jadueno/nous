@@ -1,4 +1,4 @@
-import type { Answer, NewNote, Note } from "./types";
+import type { AskResult, ChatMessage, NewNote, Note } from "./types";
 
 // Usa el mismo host desde el que se cargó la página (localhost, IP de LAN o de
 // Tailscale) en vez de "localhost" fijo, que en el móvil apuntaría al propio móvil.
@@ -34,6 +34,8 @@ export const tagsApi = {
   list: () => request<string[]>("/tags"),
 };
 
-export const askApi = {
-  ask: (question: string) => request<Answer>("/ask", { method: "POST", body: JSON.stringify({ question }) }),
+export const chatApi = {
+  listMessages: () => request<ChatMessage[]>("/messages"),
+  ask: (question: string) => request<AskResult>("/messages", { method: "POST", body: JSON.stringify({ question }) }),
+  clear: () => request<void>("/messages", { method: "DELETE" }),
 };

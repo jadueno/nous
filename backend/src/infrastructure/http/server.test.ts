@@ -85,8 +85,8 @@ describe("etiquetas", () => {
   });
 });
 
-describe("POST /ask", () => {
-  it("responde citando la nota de origen", async () => {
+describe("chat (POST/GET/DELETE /messages)", () => {
+  it("responde citando la nota de origen, y persiste pregunta y respuesta", async () => {
     await app.inject({
       method: "POST",
       url: "/notes",
@@ -95,21 +95,36 @@ describe("POST /ask", () => {
 
     const res = await app.inject({
       method: "POST",
-      url: "/ask",
+      url: "/messages",
       payload: { question: "¿Qué hace falta para el pan casero?" },
     });
 
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    expect(body.citations).toEqual([
-      expect.objectContaining({ noteTitle: "Receta de pan" }),
+    expect(body.citations).toEqual([expect.objectContaining({ noteTitle: "Receta de pan" })]);
+    expect(body.message).toMatchObject({ role: "assistant" });
+
+    const messages = await app.inject({ method: "GET", url: "/messages" });
+    expect(messages.json()).toMatchObject([
+      { role: "user", content: "¿Qué hace falta para el pan casero?" },
+      { role: "assistant" },
     ]);
   });
 
   it("sin notas guardadas, no falla y devuelve cero citas", async () => {
-    const res = await app.inject({ method: "POST", url: "/ask", payload: { question: "¿Algo?" } });
+    const res = await app.inject({ method: "POST", url: "/messages", payload: { question: "¿Algo?" } });
     expect(res.statusCode).toBe(200);
     expect(res.json().citations).toEqual([]);
+  });
+
+  it("DELETE /messages vacía la conversación", async () => {
+    await app.inject({ method: "POST", url: "/messages", payload: { question: "¿Algo?" } });
+
+    const remove = await app.inject({ method: "DELETE", url: "/messages" });
+    expect(remove.statusCode).toBe(204);
+
+    const messages = await app.inject({ method: "GET", url: "/messages" });
+    expect(messages.json()).toEqual([]);
   });
 });
 

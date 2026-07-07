@@ -26,7 +26,7 @@ Frontend (React + TS)  ──HTTP/JSON──▶  Backend (Fastify + TS)  ──S
 ```
 backend/src/
   domain/           tipos + puertos (EmbeddingProvider, LLMProvider, repositorios) + chunkText() — cero dependencias externas
-  application/       casos de uso: notes (CRUD + vectorizar), ask (RAG: recupera contexto relevante y genera la respuesta)
+  application/       casos de uso: notes (CRUD + vectorizar), chat (RAG con memoria: persiste la conversación y genera la respuesta)
   infrastructure/
     db/             pool de conexión, migraciones, repositorios Postgres/pgvector
     llm/            adaptadores: FakeProvider (tests), OllamaProvider (local, por defecto), VoyageEmbeddingProvider + AnthropicLLMProvider (opcionales, de pago)
@@ -37,7 +37,9 @@ backend/src/
 
 **Por qué Ollama y no una API de pago, para este proyecto en concreto**: RAG sobre notas *privadas* de una sola persona no tiene la misma justificación de coste que en una empresa (donde el gasto en IA se compensa con ahorro/ingreso) — pagar por token para buscar en las propias notas no compensaba. Un modelo local en el Mac mini (M4, 16GB) da respuestas reales y con comprensión semántica de verdad, sin factura ni clave de API, y refuerza la propuesta de valor central del proyecto (dueño de tus datos: ni siquiera el proveedor de IA los ve).
 
-**Por qué el chat ya no enseña citas ni existe una pantalla de "Buscar" separada**: la primera versión sí mostraba, debajo de la respuesta, las notas de origen y un buscador semántico directo — pensado como la "prueba" de que la respuesta estaba anclada a algo real. En uso real, con un modelo generando de verdad (Ollama), ese andamiaje sobraba: rompía la sensación de conversación natural sin aportar nada que el usuario fuera a usar. El backend sigue calculando y filtrando por relevancia el contexto recuperado antes de pasarlo al LLM (`MIN_RELEVANCE_SCORE` en `application/ask.ts`) — el anclaje a las notas reales sigue existiendo, solo que ya no se enseña en la interfaz.
+**Por qué el chat ya no enseña citas ni existe una pantalla de "Buscar" separada**: la primera versión sí mostraba, debajo de la respuesta, las notas de origen y un buscador semántico directo — pensado como la "prueba" de que la respuesta estaba anclada a algo real. En uso real, con un modelo generando de verdad (Ollama), ese andamiaje sobraba: rompía la sensación de conversación natural sin aportar nada que el usuario fuera a usar. El backend sigue calculando y filtrando por relevancia el contexto recuperado antes de pasarlo al LLM (`MIN_RELEVANCE_SCORE` en `application/chat.ts`) — el anclaje a las notas reales sigue existiendo, solo que ya no se enseña en la interfaz.
+
+**Memoria conversacional**: el chat persiste cada pregunta/respuesta en una tabla `messages` (Postgres, igual que las notas) como una única conversación continua — sin hilos separados, encaja con el uso personal tipo asistente único, y sobrevive a recargar la página o cambiar de dispositivo. Al preguntar, se pasan al LLM los últimos turnos (`HISTORY_LIMIT` en `application/chat.ts`) como mensajes con rol, no como texto plano concatenado — Ollama (`/api/chat`) y Anthropic soportan mensajes con rol de forma nativa, así que el historial entra como turnos reales de conversación en vez de aplanarse a mano dentro de un único prompt. Esto es lo que permite preguntas de seguimiento del tipo "¿y a Juan?" tras preguntar por los gustos de Flor, sin repetir el contexto explícitamente.
 
 ## Decisiones de testing
 

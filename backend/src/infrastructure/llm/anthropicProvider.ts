@@ -1,13 +1,13 @@
 import type { LLMProvider } from "../../domain/ports.js";
-import type { RetrievedChunk } from "../../domain/types.js";
-import { buildRagPrompt } from "./prompt.js";
+import type { ChatMessage, RetrievedChunk } from "../../domain/types.js";
+import { buildSystemPrompt } from "./prompt.js";
 
 /** Adaptador real del LLM: Claude (Anthropic). Sin SDK a propósito — una sola llamada
  * HTTP no justifica la dependencia extra, igual que el resto del proyecto evita capas
  * de indirección sin beneficio claro. */
 export function createAnthropicLLMProvider(apiKey: string): LLMProvider {
   return {
-    answer: async (question: string, context: RetrievedChunk[]): Promise<string> => {
+    answer: async (question: string, context: RetrievedChunk[], history: ChatMessage[]): Promise<string> => {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -18,7 +18,8 @@ export function createAnthropicLLMProvider(apiKey: string): LLMProvider {
         body: JSON.stringify({
           model: "claude-sonnet-5",
           max_tokens: 1024,
-          messages: [{ role: "user", content: buildRagPrompt(question, context) }],
+          system: buildSystemPrompt(context),
+          messages: [...history.map((m) => ({ role: m.role, content: m.content })), { role: "user", content: question }],
         }),
       });
       if (!res.ok) {

@@ -23,6 +23,6 @@ export default async function globalSetup() {
 
   const client = new Client({ connectionString: testUrl });
   await client.connect();
-  await client.query("truncate table chunks, notes restart identity cascade");
+  await client.query("truncate table chunks, notes, messages restart identity cascade");
   await client.end();
 }

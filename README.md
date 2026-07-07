@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/jadueno/nous/actions/workflows/ci.yml/badge.svg)](https://github.com/jadueno/nous/actions/workflows/ci.yml)
 
-Tu segundo cerebro personal autoalojado: escribe notas y pregúntales en lenguaje natural — respuestas generadas de verdad (RAG con IA local, no un buscador con plantillas encima), ancladas siempre a lo que hay realmente en tus notas.
+Tu segundo cerebro personal autoalojado: escribe notas y mantén una conversación en lenguaje natural sobre ellas — respuestas generadas de verdad (RAG con IA local, no un buscador con plantillas encima), ancladas siempre a lo que hay realmente en tus notas, con memoria de lo ya preguntado.
 
 📐 Arquitectura, decisiones técnicas y aprendizajes en **[ARCHITECTURE.md](ARCHITECTURE.md)**.
 

@@ -1,6 +1,6 @@
 import type { EmbeddingProvider, LLMProvider } from "../../domain/ports.js";
-import type { RetrievedChunk } from "../../domain/types.js";
-import { buildRagPrompt } from "./prompt.js";
+import type { ChatMessage, RetrievedChunk } from "../../domain/types.js";
+import { buildSystemPrompt } from "./prompt.js";
 
 /**
  * Adaptadores reales corriendo en local vía Ollama (http://localhost:11434 por
@@ -35,17 +35,28 @@ export function createOllamaEmbeddingProvider(baseUrl: string, model = "mxbai-em
 
 export function createOllamaLLMProvider(baseUrl: string, model = "qwen2.5:7b-instruct"): LLMProvider {
   return {
-    answer: async (question: string, context: RetrievedChunk[]): Promise<string> => {
-      const res = await fetch(`${baseUrl}/api/generate`, {
+    // /api/chat (no /api/generate): soporta mensajes con rol de forma nativa, así el
+    // historial de la conversación entra como turnos reales en vez de tener que
+    // aplanarlo a mano dentro de un único string de prompt.
+    answer: async (question: string, context: RetrievedChunk[], history: ChatMessage[]): Promise<string> => {
+      const res = await fetch(`${baseUrl}/api/chat`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ model, prompt: buildRagPrompt(question, context), stream: false }),
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: buildSystemPrompt(context) },
+            ...history.map((m) => ({ role: m.role, content: m.content })),
+            { role: "user", content: question },
+          ],
+          stream: false,
+        }),
       });
       if (!res.ok) {
         throw new Error(`Ollama (generación) respondió ${res.status}: ${await res.text()}`);
       }
-      const body = (await res.json()) as { response: string };
-      return body.response;
+      const body = (await res.json()) as { message: { content: string } };
+      return body.message.content;
     },
   };
 }

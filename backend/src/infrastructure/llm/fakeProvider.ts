@@ -51,6 +51,9 @@ export function createFakeEmbeddingProvider(): EmbeddingProvider {
 
 export function createFakeLLMProvider(): LLMProvider {
   return {
+    // El historial no afecta a la respuesta simulada: los tests que necesitan
+    // comprobar que el historial llega hasta aquí usan su propio LLMProvider de espía
+    // (ver application/chat.test.ts), no este fake.
     answer: async (question: string, context: RetrievedChunk[]) => {
       const titles = [...new Set(context.map((c) => c.noteTitle))].join(", ");
       return `[respuesta simulada] Sobre "${question}", según tus notas (${titles}).`;

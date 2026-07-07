@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { Pool } from "pg";
 
-const TABLES = ["chunks", "note_tags", "tags", "notes"];
+const TABLES = ["chunks", "note_tags", "tags", "notes", "messages"];
 
 /**
  * Pool conectado a TEST_DATABASE_URL, nunca a la base real. Falla pronto y con un

@@ -38,7 +38,16 @@ export interface Citation {
   excerpt: string;
 }
 
-export interface Answer {
-  text: string;
+/** Un turno de la conversación persistida (tabla `messages`): una sola conversación
+ * continua, sin hilos separados — encaja con el uso personal tipo asistente único. */
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+}
+
+export interface AskResult {
+  message: ChatMessage;
   citations: Citation[];
 }

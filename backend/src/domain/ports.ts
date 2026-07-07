@@ -1,4 +1,4 @@
-import type { Note, RetrievedChunk } from "./types.js";
+import type { ChatMessage, Note, RetrievedChunk } from "./types.js";
 
 /** El repositorio siempre persiste título + contenido + etiquetas (ya resueltas a
  * nombres de etiqueta, sin duplicados); es el caso de uso quien deriva el título y
@@ -27,6 +27,13 @@ export interface ChunkRepository {
   searchSimilar(embedding: number[], limit: number): Promise<RetrievedChunk[]>;
 }
 
+export interface ChatRepository {
+  /** Últimos `limit` mensajes en orden cronológico (más antiguo primero); todos si se omite. */
+  list(limit?: number): Promise<ChatMessage[]>;
+  append(role: ChatMessage["role"], content: string): Promise<ChatMessage>;
+  clear(): Promise<void>;
+}
+
 /**
  * Puerto de embeddings: convierte texto en vectores. Independiente del puerto de LLM
  * a propósito — Anthropic no ofrece embeddings propios, así que el adaptador real
@@ -38,8 +45,9 @@ export interface EmbeddingProvider {
 }
 
 export interface LLMProvider {
-  /** Genera una respuesta a partir de la pregunta y los trozos de contexto recuperados. */
-  answer(question: string, context: RetrievedChunk[]): Promise<string>;
+  /** Genera una respuesta a partir de la pregunta, los trozos de contexto recuperados y los
+   * últimos turnos de la conversación (para preguntas de seguimiento tipo "¿y en qué cantidad?"). */
+  answer(question: string, context: RetrievedChunk[], history: ChatMessage[]): Promise<string>;
 }
 
 const MAX_TITLE_LENGTH = 80;
