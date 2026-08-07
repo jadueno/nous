@@ -14,6 +14,8 @@ Datos ficticios de ejemplo.
 | --- | --- | --- |
 | ![Notas](docs/screenshots/notas-desktop.png) | ![Chat](docs/screenshots/chat-desktop.png) | ![Notas en móvil](docs/screenshots/notas-movil.png) |
 
+<sub>Imagen de vista previa social (1280×640) para el repo en `docs/social-preview.png` — súbela en Settings → General → Social preview.</sub>
+
 ## Por qué
 
 Las alternativas cloud (Notion AI, Mem, Tana) no te dejan ser dueño de tus datos; las autoalojadas open-source (Khoj, Onyx, Quivr) están pensadas para equipos, con arquitecturas pesadas para un uso genuinamente personal. Nous es ligero (Postgres + `pgvector`, sin servicio de BD vectorial aparte), autoalojado, y con el proveedor de IA (embeddings + LLM) intercambiable por diseño — por defecto corre en local con **Ollama** (gratis, tus notas nunca salen del Mac), con Claude + Voyage AI como alternativa opcional de pago si algún día quieres mejor calidad.
