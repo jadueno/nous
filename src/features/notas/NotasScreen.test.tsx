@@ -110,6 +110,7 @@ describe("NotasScreen", () => {
     expect(screen.getByText("viajes")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "viajes" }));
-    await waitFor(() => expect(notesApi.list).toHaveBeenLastCalledWith("viajes"));
+    await waitFor(() => expect(screen.getByText('Ninguna nota con la etiqueta "viajes".')).toBeInTheDocument());
+    expect(screen.queryByText("Receta de pan")).not.toBeInTheDocument();
   });
 });

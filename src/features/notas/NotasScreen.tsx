@@ -31,8 +31,13 @@ function preview(content: string): string {
 
 export function NotasScreen() {
   const [activeTag, setActiveTag] = useState<string | null>(null);
-  const { notes, loading, error, addNote, updateNote, removeNote } = useNotes(activeTag ?? undefined);
-  const allTags = useTags(notes);
+  // Siempre sin filtrar: el filtro por etiqueta se aplica en el cliente (abajo), no
+  // repitiendo la petición al backend. Así solo hay una fuente de datos, que sirve a
+  // la vez para la lista visible y para resolver enlaces [[...]] y backlinks en el
+  // formulario contra notas que un filtro de etiqueta activo dejaría fuera.
+  const { notes: allNotes, loading, error, addNote, updateNote, removeNote } = useNotes();
+  const notes = activeTag ? allNotes.filter((n) => n.tags.includes(activeTag)) : allNotes;
+  const allTags = useTags(allNotes);
   const confirm = useConfirm();
   const [editing, setEditing] = useState<Note | "new" | null>(null);
 
@@ -91,21 +96,25 @@ export function NotasScreen() {
 
       {editing === "new" && (
         <NoteForm
+          allNotes={allNotes}
           onSubmit={async (note) => {
             await addNote(note);
             setEditing(null);
           }}
           onCancel={() => setEditing(null)}
+          onJumpToNote={setEditing}
         />
       )}
       {editing && editing !== "new" && (
         <NoteForm
           initialNote={editing}
+          allNotes={allNotes}
           onSubmit={async (note) => {
             await updateNote(editing.id, note);
             setEditing(null);
           }}
           onCancel={() => setEditing(null)}
+          onJumpToNote={setEditing}
         />
       )}
 
