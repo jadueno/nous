@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-nous}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en tu .env (copia .env.example y pon una contraseña propia)}
     ports:
-      - "${POSTGRES_PORT:-5434}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5434}:5432"
     volumes:
       - nous-db:/var/lib/postgresql/data
     healthcheck:
